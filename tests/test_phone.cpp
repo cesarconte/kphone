@@ -26,6 +26,7 @@ private slots:
     // RecentsModel tests
     void testRecentsAddAndFilter();
     void testRecentsClear();
+    void testRecentsClearMissedAndRemove();
 
     // PhoneController tests
     void testDialerInput();
@@ -121,6 +122,28 @@ void TestPhone::testRecentsClear()
 
     recents.clearHistory();
     QCOMPARE(recents.count(), 0);
+}
+
+void TestPhone::testRecentsClearMissedAndRemove()
+{
+    RecentsModel recents;
+    recents.clearHistory();
+
+    recents.addCall(QStringLiteral("Amigo"), QStringLiteral("611111111"), 0, 30); // Outgoing
+    recents.addCall(QStringLiteral("Spam"), QStringLiteral("622222222"), 2, 0);  // Missed
+    recents.addCall(QStringLiteral("Oficina"), QStringLiteral("985000000"), 1, 60); // Incoming
+
+    QCOMPARE(recents.allCount(), 3);
+    QCOMPARE(recents.missedCount(), 1);
+
+    // Remove single call
+    recents.removeAt(0); // Removes newest call ("Oficina")
+    QCOMPARE(recents.allCount(), 2);
+
+    // Clear missed calls only
+    recents.clearMissed();
+    QCOMPARE(recents.missedCount(), 0);
+    QCOMPARE(recents.allCount(), 1); // Only "Amigo" remains
 }
 
 void TestPhone::testDialerInput()

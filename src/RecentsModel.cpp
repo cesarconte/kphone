@@ -61,6 +61,22 @@ int RecentsModel::count() const
     return m_filteredCalls.size();
 }
 
+int RecentsModel::allCount() const
+{
+    return m_allCalls.size();
+}
+
+int RecentsModel::missedCount() const
+{
+    int missed = 0;
+    for (const auto &call : m_allCalls) {
+        if (call.type == 2) {
+            missed++;
+        }
+    }
+    return missed;
+}
+
 bool RecentsModel::onlyMissed() const
 {
     return m_onlyMissed;
@@ -102,6 +118,47 @@ void RecentsModel::clearHistory()
     beginResetModel();
     m_allCalls.clear();
     m_filteredCalls.clear();
+    endResetModel();
+    save();
+    Q_EMIT countChanged();
+}
+
+void RecentsModel::clearMissed()
+{
+    beginResetModel();
+    m_allCalls.removeIf([](const RecentCallItem &c) {
+        return c.type == 2;
+    });
+    applyFilter();
+    endResetModel();
+    save();
+    Q_EMIT countChanged();
+}
+
+void RecentsModel::clearCurrent()
+{
+    if (m_onlyMissed) {
+        clearMissed();
+    } else {
+        clearHistory();
+    }
+}
+
+void RecentsModel::removeAt(int row)
+{
+    if (row < 0 || row >= m_filteredCalls.size()) {
+        return;
+    }
+
+    const RecentCallItem target = m_filteredCalls[row];
+    beginResetModel();
+    for (int i = 0; i < m_allCalls.size(); ++i) {
+        if (m_allCalls[i].timestamp == target.timestamp && m_allCalls[i].number == target.number) {
+            m_allCalls.removeAt(i);
+            break;
+        }
+    }
+    applyFilter();
     endResetModel();
     save();
     Q_EMIT countChanged();

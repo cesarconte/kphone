@@ -18,6 +18,8 @@ class RecentsModel : public QAbstractListModel
 {
     Q_OBJECT
     Q_PROPERTY(int count READ count NOTIFY countChanged)
+    Q_PROPERTY(int allCount READ allCount NOTIFY countChanged)
+    Q_PROPERTY(int missedCount READ missedCount NOTIFY countChanged)
     Q_PROPERTY(bool onlyMissed READ onlyMissed WRITE setOnlyMissed NOTIFY onlyMissedChanged)
 
 public:
@@ -39,11 +41,16 @@ public:
     QHash<int, QByteArray> roleNames() const override;
 
     int count() const;
+    int allCount() const;
+    int missedCount() const;
     bool onlyMissed() const;
     void setOnlyMissed(bool missed);
 
     Q_INVOKABLE void addCall(const QString &name, const QString &number, int type, int durationSeconds = 0);
     Q_INVOKABLE void clearHistory();
+    Q_INVOKABLE void clearMissed();
+    Q_INVOKABLE void clearCurrent();
+    Q_INVOKABLE void removeAt(int row);
 
 signals:
     void countChanged();

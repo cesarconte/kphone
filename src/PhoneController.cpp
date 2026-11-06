@@ -9,6 +9,8 @@
 #include <QDBusReply>
 #include <QDBusMessage>
 #include <QRegularExpression>
+#include <QGuiApplication>
+#include <QClipboard>
 
 PhoneController::PhoneController(ContactsModel *contacts, RecentsModel *recents, QObject *parent)
     : QObject(parent)
@@ -125,6 +127,13 @@ void PhoneController::clearNumber()
 void PhoneController::playDtmf(const QString &digit)
 {
     m_dtmf->playTone(digit);
+}
+
+void PhoneController::copyToClipboard(const QString &text)
+{
+    if (auto *cb = QGuiApplication::clipboard()) {
+        cb->setText(text);
+    }
 }
 
 void PhoneController::startCall(const QString &targetNumber)

@@ -61,6 +61,7 @@ public:
     Q_INVOKABLE void openPhoneMirroring();
     Q_INVOKABLE void openSms(const QString &number);
     Q_INVOKABLE void playDtmf(const QString &digit);
+    Q_INVOKABLE void copyToClipboard(const QString &text);
 
 signals:
     void dialedNumberChanged();
