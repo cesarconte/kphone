@@ -146,8 +146,10 @@ void PhoneController::startCall(const QString &targetNumber)
     Q_EMIT formattedNumberChanged();
     Q_EMIT activeContactNameChanged();
 
-    // Dispatch via KDE Connect / system URL handler
-    QDesktopServices::openUrl(QUrl(QStringLiteral("tel:%1").arg(numberToCall)));
+    // Dispatch directly via kdeconnect-handler to communicate with smartphone
+    if (!QProcess::startDetached(QStringLiteral("kdeconnect-handler"), {QStringLiteral("tel:%1").arg(numberToCall)})) {
+        QDesktopServices::openUrl(QUrl(QStringLiteral("tel:%1").arg(numberToCall)));
+    }
 
     // Update state to Dialing, then Active
     setCallState(Dialing);

@@ -7,7 +7,6 @@ Icon=kphone
 Terminal=false
 Type=Application
 Categories=Office;Telephony;Utility;Qt;KDE;
-MimeType=x-scheme-handler/tel;
 StartupNotify=true
 StartupWMClass=kphone
 Keywords=phone;dialer;call;contacts;kdeconnect;sequoia;
