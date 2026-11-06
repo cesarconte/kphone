@@ -3,7 +3,9 @@
 #include <QQmlContext>
 #include <QIcon>
 #include <QCommandLineParser>
+#include <QLoggingCategory>
 #include <KLocalizedString>
+#include <KLocalizedQmlContext>
 #include <KAboutData>
 
 #include "PhoneController.h"
@@ -12,6 +14,10 @@
 
 int main(int argc, char *argv[])
 {
+    // Configure Intel VA-API hardware backend and suppress unnecessary video decoding stderr logs for pure audio telephony
+    qputenv("LIBVA_DRIVER_NAME", "iHD");
+    QLoggingCategory::setFilterRules(QStringLiteral("qt.multimedia.ffmpeg.warning=false\nqt.multimedia.ffmpeg.debug=false\nqt.multimedia.ffmpeg=false"));
+
     QGuiApplication app(argc, argv);
     app.setApplicationName(QStringLiteral("kphone"));
     app.setApplicationDisplayName(QStringLiteral("Teléfono"));
@@ -47,6 +53,7 @@ int main(int argc, char *argv[])
     }
 
     QQmlApplicationEngine engine;
+    KLocalization::setupLocalizedContext(&engine);
     engine.rootContext()->setContextProperty(QStringLiteral("contactsModel"), contactsModel);
     engine.rootContext()->setContextProperty(QStringLiteral("recentsModel"), recentsModel);
     engine.rootContext()->setContextProperty(QStringLiteral("phoneController"), phoneController);

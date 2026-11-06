@@ -23,6 +23,7 @@ target_link_libraries(kphone PRIVATE
     Qt6::Multimedia
     KF6::CoreAddons
     KF6::I18n
+    KF6::I18nQml
     KF6::Kirigami
 )
 

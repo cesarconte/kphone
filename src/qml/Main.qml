@@ -12,7 +12,7 @@ Kirigami.ApplicationWindow {
     minimumHeight: 540
 
     // Top Device Status Bar
-    header: ToolBar {
+    header: QQC2.ToolBar {
         background: Rectangle {
             color: Kirigami.Theme.backgroundColor.hslLightness < 0.5 ? "#1C1C1E" : "#F8F8F8"
             border.color: Kirigami.Theme.backgroundColor.hslLightness < 0.5 ? "#2C2C2E" : "#E5E5EA"
@@ -26,8 +26,8 @@ Kirigami.ApplicationWindow {
 
             // Status Indicator Dot
             Rectangle {
-                width: 8
-                height: 8
+                Layout.preferredWidth: 8
+                Layout.preferredHeight: 8
                 radius: 4
                 color: phoneController.isDeviceConnected ? "#34C759" : "#FF9500"
             }
@@ -55,16 +55,16 @@ Kirigami.ApplicationWindow {
 
                 Kirigami.Icon {
                     source: "battery"
-                    width: 14
-                    height: 14
+                    Layout.preferredWidth: 14
+                    Layout.preferredHeight: 14
                     color: Kirigami.Theme.disabledTextColor
                 }
             }
 
             // Quick Mirroring Action Icon
             Rectangle {
-                width: 26
-                height: 26
+                Layout.preferredWidth: 26
+                Layout.preferredHeight: 26
                 radius: 6
                 color: mirrorMouse.pressed ? "#48484A" : "transparent"
 
