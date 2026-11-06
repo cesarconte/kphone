@@ -183,7 +183,8 @@ void PhoneController::endCall()
     m_callTimer.stop();
 
     if (m_recentsModel && !m_dialedNumber.isEmpty()) {
-        m_recentsModel->addCall(m_activeContactName, m_dialedNumber, 0, m_callDuration);
+        const int callType = (m_callState == Ringing && m_callDuration == 0) ? 2 : 0;
+        m_recentsModel->addCall(m_activeContactName, m_dialedNumber, callType, m_callDuration);
     }
 
     setCallState(Ended);

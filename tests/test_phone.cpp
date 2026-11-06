@@ -31,6 +31,7 @@ private slots:
     void testRecentsClear();
     void testRecentsClearMissedAndRemove();
     void testQmlRecentsClear();
+    void testRemoveMissedCall();
 
     // PhoneController tests
     void testDialerInput();
@@ -176,6 +177,24 @@ void TestPhone::testQmlRecentsClear()
     QMetaObject::invokeMethod(obj, "doClearAll");
     QCOMPARE(recents.count(), 0);
     delete obj;
+}
+
+void TestPhone::testRemoveMissedCall()
+{
+    RecentsModel recents;
+    recents.clearHistory();
+    recents.addCall(QStringLiteral("Outgoing"), QStringLiteral("111"), 0, 10);
+    recents.addCall(QStringLiteral("Missed 1"), QStringLiteral("222"), 2, 0);
+    recents.addCall(QStringLiteral("Missed 2"), QStringLiteral("333"), 2, 0);
+
+    recents.setOnlyMissed(true);
+    QCOMPARE(recents.count(), 2);
+
+    const QString idToRemove = recents.data(recents.index(0, 0), RecentsModel::IdRole).toString();
+    QVERIFY(!idToRemove.isEmpty());
+    recents.removeById(idToRemove);
+    QCOMPARE(recents.count(), 1);
+    QCOMPARE(recents.allCount(), 2);
 }
 
 void TestPhone::testDialerInput()

@@ -138,38 +138,16 @@ Item {
                     onClicked: phoneController.startCall(model.number)
                 }
             }
-
-            // Empty state placeholder
-            Item {
-                anchors.centerIn: parent
-                visible: favoritesModel.count === 0
-                ColumnLayout {
-                    spacing: 10
-                    Kirigami.Icon {
-                        source: "starred-symbolic"
-                        Layout.preferredWidth: 48
-                        Layout.preferredHeight: 48
-                        color: Kirigami.Theme.disabledTextColor
-                        Layout.alignment: Qt.AlignHCenter
-                    }
-                    Text {
-                        text: i18n("Sin contactos favoritos")
-                        font.pixelSize: 15
-                        font.weight: Font.DemiBold
-                        color: Kirigami.Theme.textColor
-                        Layout.alignment: Qt.AlignHCenter
-                    }
-                    Text {
-                        text: i18n("Marca la estrella en la ficha de un contacto para añadirlo aquí")
-                        font.pixelSize: 12
-                        color: Kirigami.Theme.disabledTextColor
-                        Layout.alignment: Qt.AlignHCenter
-                        horizontalAlignment: Text.AlignHCenter
-                        Layout.preferredWidth: 260
-                        wrapMode: Text.WordWrap
-                    }
-                }
-            }
         }
+    }
+
+    // Official KDE HIG Empty State Placeholder
+    Kirigami.PlaceholderMessage {
+        anchors.centerIn: parent
+        width: parent.width - Kirigami.Units.gridUnit * 4
+        visible: favoritesModel.count === 0
+        icon.name: "starred-symbolic"
+        text: i18n("Sin contactos favoritos")
+        explanation: i18n("Marca la estrella en la ficha de un contacto para añadirlo aquí")
     }
 }

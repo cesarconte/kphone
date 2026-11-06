@@ -25,7 +25,8 @@ class RecentsModel : public QAbstractListModel
 
 public:
     enum RecentRoles {
-        NameRole = Qt::UserRole + 1,
+        IdRole = Qt::UserRole + 1,
+        NameRole,
         NumberRole,
         FormattedNumberRole,
         TypeRole,
@@ -52,6 +53,7 @@ public:
     Q_INVOKABLE void clearMissed();
     Q_INVOKABLE void clearCurrent();
     Q_INVOKABLE void removeAt(int row);
+    Q_INVOKABLE void removeById(const QString &callId);
 
 signals:
     void countChanged();

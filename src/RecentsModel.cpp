@@ -30,6 +30,7 @@ QVariant RecentsModel::data(const QModelIndex &index, int role) const
 
     const auto &call = m_filteredCalls[index.row()];
     switch (role) {
+    case IdRole: return call.id;
     case NameRole: return call.name;
     case NumberRole: return call.number;
     case FormattedNumberRole: return call.formattedNumber;
@@ -48,6 +49,7 @@ QVariant RecentsModel::data(const QModelIndex &index, int role) const
 QHash<int, QByteArray> RecentsModel::roleNames() const
 {
     return {
+        {IdRole, "callId"},
         {NameRole, "name"},
         {NumberRole, "number"},
         {FormattedNumberRole, "formattedNumber"},
@@ -88,7 +90,9 @@ void RecentsModel::setOnlyMissed(bool missed)
 {
     if (m_onlyMissed != missed) {
         m_onlyMissed = missed;
+        beginResetModel();
         applyFilter();
+        endResetModel();
         Q_EMIT onlyMissedChanged();
     }
 }
@@ -157,9 +161,19 @@ void RecentsModel::removeAt(int row)
 
     const QString targetId = m_filteredCalls[row].id;
     qDebug() << "RecentsModel::removeAt called for row" << row << "id:" << targetId;
+    removeById(targetId);
+}
+
+void RecentsModel::removeById(const QString &callId)
+{
+    if (callId.isEmpty()) {
+        return;
+    }
+
+    qDebug() << "RecentsModel::removeById called for id:" << callId;
     beginResetModel();
-    m_allCalls.removeIf([&targetId](const RecentCallItem &c) {
-        return c.id == targetId;
+    m_allCalls.removeIf([&callId](const RecentCallItem &c) {
+        return c.id == callId;
     });
     applyFilter();
     endResetModel();

@@ -303,7 +303,7 @@ Item {
                             cursorShape: Qt.PointingHandCursor
                             onClicked: (mouse) => {
                                 mouse.accepted = true;
-                                recentsModel.removeAt(index);
+                                recentsModel.removeById(model.callId);
                             }
                         }
 
@@ -349,45 +349,24 @@ Item {
                         QQC2.MenuItem {
                             text: i18n("Eliminar de recientes")
                             icon.name: "edit-delete"
-                            onTriggered: recentsModel.removeAt(index)
+                            onTriggered: recentsModel.removeById(model.callId)
                         }
                     }
                 }
             }
-
-            // Empty state placeholder
-            Item {
-                anchors.centerIn: parent
-                visible: recentsModel.count === 0
-                ColumnLayout {
-                    spacing: 10
-                    Kirigami.Icon {
-                        source: recentsModel.onlyMissed ? "call-missed" : "chronometer"
-                        Layout.preferredWidth: 48
-                        Layout.preferredHeight: 48
-                        color: Kirigami.Theme.disabledTextColor
-                        Layout.alignment: Qt.AlignHCenter
-                    }
-                    Text {
-                        text: recentsModel.onlyMissed 
-                            ? i18n("Sin llamadas perdidas") 
-                            : i18n("Sin llamadas recientes")
-                        font.pixelSize: 15
-                        font.weight: Font.DemiBold
-                        color: Kirigami.Theme.textColor
-                        Layout.alignment: Qt.AlignHCenter
-                    }
-                    Text {
-                        text: recentsModel.onlyMissed
-                            ? i18n("No tienes llamadas perdidas registradas")
-                            : i18n("Las llamadas entrantes, salientes y perdidas aparecerán aquí")
-                        font.pixelSize: 12
-                        color: Kirigami.Theme.disabledTextColor
-                        Layout.alignment: Qt.AlignHCenter
-                    }
-                }
-            }
         }
+    }
+
+    // Official KDE HIG Empty State Placeholder
+    Kirigami.PlaceholderMessage {
+        anchors.centerIn: parent
+        width: parent.width - Kirigami.Units.gridUnit * 4
+        visible: recentsModel.count === 0
+        icon.name: recentsModel.onlyMissed ? "call-missed" : "chronometer"
+        text: recentsModel.onlyMissed ? i18n("Sin llamadas perdidas") : i18n("Sin llamadas recientes")
+        explanation: recentsModel.onlyMissed 
+            ? i18n("No tienes llamadas perdidas registradas")
+            : i18n("Las llamadas entrantes, salientes y perdidas aparecerán aquí")
     }
 
     // Modal Confirmation Dialog for clearing calls
