@@ -6,25 +6,26 @@ import org.kde.kirigami as Kirigami
 Item {
     id: root
 
+    implicitWidth: Kirigami.Units.gridUnit * 19
+    implicitHeight: Kirigami.Units.gridUnit * 28
+
     ColumnLayout {
         anchors.fill: parent
-        anchors.margins: 14
-        spacing: 12
+        anchors.margins: Kirigami.Units.largeSpacing
+        spacing: Kirigami.Units.mediumSpacing
 
         // Top Navigation Header with Centered Segmented Control & Clear Action
         RowLayout {
             Layout.fillWidth: true
-            Layout.leftMargin: 2
-            Layout.rightMargin: 2
-            spacing: 8
+            spacing: Kirigami.Units.smallSpacing
 
             // Left: Clear history action button
             QQC2.Button {
                 id: clearBtn
-                text: i18n("Borrar")
+                text: recentsModel.onlyMissed ? i18n("Borrar perdidas") : i18n("Borrar")
                 icon.name: "edit-delete"
                 flat: true
-                Layout.preferredHeight: 32
+                Layout.preferredHeight: Kirigami.Units.gridUnit * 1.8
                 visible: (recentsModel.onlyMissed ? recentsModel.missedCount : recentsModel.allCount) > 0
 
                 contentItem: RowLayout {
@@ -51,34 +52,7 @@ Item {
                     Behavior on color { ColorAnimation { duration: 100 } }
                 }
 
-                onClicked: clearMenu.open()
-
-                QQC2.Menu {
-                    id: clearMenu
-                    y: clearBtn.height + 4
-
-                    QQC2.MenuItem {
-                        text: recentsModel.onlyMissed 
-                            ? i18n("Borrar llamadas perdidas (%1)", recentsModel.missedCount)
-                            : i18n("Borrar todo el historial (%1)", recentsModel.allCount)
-                        icon.name: "edit-delete"
-                        onTriggered: recentsModel.clearCurrent()
-                    }
-
-                    QQC2.MenuItem {
-                        text: i18n("Borrar solo llamadas perdidas (%1)", recentsModel.missedCount)
-                        icon.name: "call-missed"
-                        visible: !recentsModel.onlyMissed && recentsModel.missedCount > 0
-                        onTriggered: recentsModel.clearMissed()
-                    }
-
-                    QQC2.MenuItem {
-                        text: i18n("Borrar todas las llamadas (%1)", recentsModel.allCount)
-                        icon.name: "edit-delete"
-                        visible: recentsModel.onlyMissed && (recentsModel.allCount > recentsModel.missedCount)
-                        onTriggered: recentsModel.clearHistory()
-                    }
-                }
+                onClicked: clearConfirmDialog.open()
             }
 
             // Expanding spacer before center
@@ -89,8 +63,8 @@ Item {
             // Center Segmented Capsule (Todas | Perdidas)
             Rectangle {
                 Layout.alignment: Qt.AlignHCenter
-                width: 200
-                height: 32
+                width: Kirigami.Units.gridUnit * 11
+                height: Kirigami.Units.gridUnit * 1.8
                 radius: 8
                 color: Kirigami.Theme.backgroundColor.hslLightness < 0.5 ? "#1C1C1E" : "#E5E5EA"
 
@@ -178,7 +152,7 @@ Item {
             // Right spacer to keep segmented bar strictly centered when clearBtn is visible
             Item {
                 Layout.preferredWidth: clearBtn.visible ? clearBtn.width : 0
-                Layout.preferredHeight: 32
+                Layout.preferredHeight: clearBtn.height
             }
         }
 
@@ -189,7 +163,7 @@ Item {
             Layout.fillHeight: true
             clip: true
             model: recentsModel
-            spacing: 8
+            spacing: Kirigami.Units.smallSpacing
 
             delegate: Rectangle {
                 id: itemCard
@@ -327,7 +301,10 @@ Item {
                             anchors.fill: parent
                             hoverEnabled: true
                             cursorShape: Qt.PointingHandCursor
-                            onClicked: recentsModel.removeAt(index)
+                            onClicked: (mouse) => {
+                                mouse.accepted = true;
+                                recentsModel.removeAt(index);
+                            }
                         }
 
                         QQC2.ToolTip.visible: delMouse.containsMouse
@@ -411,5 +388,40 @@ Item {
                 }
             }
         }
+    }
+
+    // Modal Confirmation Dialog for clearing calls
+    Kirigami.PromptDialog {
+        id: clearConfirmDialog
+        title: recentsModel.onlyMissed ? i18n("Borrar llamadas perdidas") : i18n("Borrar llamadas recientes")
+        subtitle: recentsModel.onlyMissed
+            ? i18n("¿Estás seguro de que deseas eliminar todas las llamadas perdidas (%1)?", recentsModel.missedCount)
+            : i18n("¿Estás seguro de que deseas vaciar el historial de llamadas recientes (%1)?", recentsModel.allCount)
+
+        standardButtons: Kirigami.Dialog.Cancel
+
+        customFooterActions: [
+            Kirigami.Action {
+                text: recentsModel.onlyMissed ? i18n("Borrar perdidas") : i18n("Borrar todas")
+                icon.name: "edit-delete"
+                onTriggered: {
+                    if (recentsModel.onlyMissed) {
+                        recentsModel.clearMissed();
+                    } else {
+                        recentsModel.clearHistory();
+                    }
+                    clearConfirmDialog.close();
+                }
+            },
+            Kirigami.Action {
+                text: i18n("Solo perdidas (%1)", recentsModel.missedCount)
+                icon.name: "call-missed"
+                visible: !recentsModel.onlyMissed && recentsModel.missedCount > 0
+                onTriggered: {
+                    recentsModel.clearMissed();
+                    clearConfirmDialog.close();
+                }
+            }
+        ]
     }
 }

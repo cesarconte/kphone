@@ -2,6 +2,9 @@
 #include <QSignalSpy>
 #include <QTemporaryDir>
 #include <QStandardPaths>
+#include <QQmlEngine>
+#include <QQmlContext>
+#include <QQmlComponent>
 
 #include "../src/ContactsModel.h"
 #include "../src/FavoritesProxyModel.h"
@@ -27,6 +30,7 @@ private slots:
     void testRecentsAddAndFilter();
     void testRecentsClear();
     void testRecentsClearMissedAndRemove();
+    void testQmlRecentsClear();
 
     // PhoneController tests
     void testDialerInput();
@@ -144,6 +148,34 @@ void TestPhone::testRecentsClearMissedAndRemove()
     recents.clearMissed();
     QCOMPARE(recents.missedCount(), 0);
     QCOMPARE(recents.allCount(), 1); // Only "Amigo" remains
+}
+
+void TestPhone::testQmlRecentsClear()
+{
+    RecentsModel recents;
+    recents.clearHistory();
+    recents.addCall(QStringLiteral("A"), QStringLiteral("123"), 0, 10);
+    recents.addCall(QStringLiteral("B"), QStringLiteral("456"), 2, 0);
+    QCOMPARE(recents.count(), 2);
+
+    QQmlEngine engine;
+    engine.rootContext()->setContextProperty(QStringLiteral("recentsModel"), &recents);
+    QQmlComponent component(&engine);
+    component.setData(QByteArrayLiteral(R"(
+        import QtQuick
+        import QtQuick.Controls
+        Item {
+            function doClearMissed() { recentsModel.clearMissed(); }
+            function doClearAll() { recentsModel.clearHistory(); }
+        }
+    )"), QUrl());
+    auto *obj = component.create();
+    QVERIFY(obj);
+    QMetaObject::invokeMethod(obj, "doClearMissed");
+    QCOMPARE(recents.count(), 1);
+    QMetaObject::invokeMethod(obj, "doClearAll");
+    QCOMPARE(recents.count(), 0);
+    delete obj;
 }
 
 void TestPhone::testDialerInput()

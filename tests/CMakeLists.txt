@@ -10,6 +10,7 @@ add_executable(test_phone
 target_link_libraries(test_phone PRIVATE
     Qt6::Core
     Qt6::Gui
+    Qt6::Qml
     Qt6::DBus
     Qt6::Multimedia
     Qt6::Test

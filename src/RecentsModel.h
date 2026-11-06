@@ -6,6 +6,7 @@
 
 struct RecentCallItem
 {
+    QString id;
     QString name;
     QString number;
     QString formattedNumber;

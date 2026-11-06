@@ -6,10 +6,10 @@ import org.kde.kirigami as Kirigami
 Kirigami.ApplicationWindow {
     id: appWindow
     title: i18n("Teléfono")
-    width: 370
-    height: 620
-    minimumWidth: 320
-    minimumHeight: 540
+    width: Kirigami.Units.gridUnit * 22
+    height: Kirigami.Units.gridUnit * 36
+    minimumWidth: Math.max(Kirigami.Units.gridUnit * 19, (viewStack.currentItem && viewStack.currentItem.implicitWidth > 0 ? viewStack.currentItem.implicitWidth : 0))
+    minimumHeight: Math.max(Kirigami.Units.gridUnit * 30, (viewStack.currentItem && viewStack.currentItem.implicitHeight > 0 ? viewStack.currentItem.implicitHeight + (header ? header.implicitHeight : 0) + (footer ? footer.implicitHeight : 0) : 0))
 
     // Top Device Status Bar
     header: QQC2.ToolBar {

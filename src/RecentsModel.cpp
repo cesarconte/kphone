@@ -5,6 +5,8 @@
 #include <QJsonDocument>
 #include <QJsonArray>
 #include <QJsonObject>
+#include <QUuid>
+#include <QDebug>
 
 RecentsModel::RecentsModel(QObject *parent)
     : QAbstractListModel(parent)
@@ -94,6 +96,7 @@ void RecentsModel::setOnlyMissed(bool missed)
 void RecentsModel::addCall(const QString &name, const QString &number, int type, int durationSeconds)
 {
     RecentCallItem item;
+    item.id = QUuid::createUuid().toString(QUuid::WithoutBraces);
     item.name = name.isEmpty() ? number : name;
     item.number = number;
     item.formattedNumber = number;
@@ -115,6 +118,7 @@ void RecentsModel::addCall(const QString &name, const QString &number, int type,
 
 void RecentsModel::clearHistory()
 {
+    qDebug() << "RecentsModel::clearHistory called! Removing all" << m_allCalls.size() << "calls.";
     beginResetModel();
     m_allCalls.clear();
     m_filteredCalls.clear();
@@ -125,6 +129,7 @@ void RecentsModel::clearHistory()
 
 void RecentsModel::clearMissed()
 {
+    qDebug() << "RecentsModel::clearMissed called! Removing missed calls.";
     beginResetModel();
     m_allCalls.removeIf([](const RecentCallItem &c) {
         return c.type == 2;
@@ -150,14 +155,12 @@ void RecentsModel::removeAt(int row)
         return;
     }
 
-    const RecentCallItem target = m_filteredCalls[row];
+    const QString targetId = m_filteredCalls[row].id;
+    qDebug() << "RecentsModel::removeAt called for row" << row << "id:" << targetId;
     beginResetModel();
-    for (int i = 0; i < m_allCalls.size(); ++i) {
-        if (m_allCalls[i].timestamp == target.timestamp && m_allCalls[i].number == target.number) {
-            m_allCalls.removeAt(i);
-            break;
-        }
-    }
+    m_allCalls.removeIf([&targetId](const RecentCallItem &c) {
+        return c.id == targetId;
+    });
     applyFilter();
     endResetModel();
     save();
@@ -188,6 +191,10 @@ void RecentsModel::load()
             for (const auto &val : doc.array()) {
                 const auto obj = val.toObject();
                 RecentCallItem item;
+                item.id = obj.value(QStringLiteral("id")).toString();
+                if (item.id.isEmpty()) {
+                    item.id = QUuid::createUuid().toString(QUuid::WithoutBraces);
+                }
                 item.name = obj.value(QStringLiteral("name")).toString();
                 item.number = obj.value(QStringLiteral("number")).toString();
                 item.formattedNumber = item.number;
@@ -212,6 +219,7 @@ void RecentsModel::save()
         QJsonArray arr;
         for (const auto &call : m_allCalls) {
             QJsonObject obj;
+            obj[QStringLiteral("id")] = call.id;
             obj[QStringLiteral("name")] = call.name;
             obj[QStringLiteral("number")] = call.number;
             obj[QStringLiteral("type")] = call.type;
