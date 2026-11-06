@@ -1,0 +1,6 @@
+build/
+.cache/
+*.kdev4
+.directory
+*~
+*.autosave

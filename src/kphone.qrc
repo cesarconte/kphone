@@ -1,0 +1,11 @@
+<RCC>
+    <qresource prefix="/">
+        <file>qml/Main.qml</file>
+        <file>qml/KeypadView.qml</file>
+        <file>qml/ContactsView.qml</file>
+        <file>qml/RecentsView.qml</file>
+        <file>qml/FavoritesView.qml</file>
+        <file>qml/InCallView.qml</file>
+        <file>resources/icons/kphone.svg</file>
+    </qresource>
+</RCC>

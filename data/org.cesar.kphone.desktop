@@ -1,0 +1,25 @@
+[Desktop Entry]
+Name=Teléfono
+GenericName=Phone Dialer
+Comment=macOS-style Phone App & Dialer for KDE Plasma 6
+Exec=kphone %u
+Icon=kphone
+Terminal=false
+Type=Application
+Categories=Office;Telephony;Utility;Qt;KDE;
+MimeType=x-scheme-handler/tel;
+StartupNotify=true
+StartupWMClass=kphone
+Keywords=phone;dialer;call;contacts;kdeconnect;sequoia;
+X-KDE-SubstituteUID=false
+Actions=Dialpad;PhoneMirroring;
+
+[Desktop Action Dialpad]
+Name=Abrir teclado numérico
+Exec=kphone --tab dialer
+Icon=input-dialpad
+
+[Desktop Action PhoneMirroring]
+Name=Duplicación de pantalla
+Exec=kphonemirroring
+Icon=kphonemirroring

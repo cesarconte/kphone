@@ -1,0 +1,38 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="100%" height="100%">
+  <defs>
+    <!-- Background Gradient (macOS Phone Green) -->
+    <linearGradient id="phoneBgGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#34D35C"/>
+      <stop offset="50%" stop-color="#30D158"/>
+      <stop offset="100%" stop-color="#28BA4D"/>
+    </linearGradient>
+
+    <!-- Subtle inner specular highlight -->
+    <linearGradient id="innerGlow" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#ffffff" stop-opacity="0.35"/>
+      <stop offset="25%" stop-color="#ffffff" stop-opacity="0.08"/>
+      <stop offset="100%" stop-color="#000000" stop-opacity="0.12"/>
+    </linearGradient>
+
+    <!-- Handset subtle gradient -->
+    <linearGradient id="handsetGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FFFFFF"/>
+      <stop offset="100%" stop-color="#F2F2F7"/>
+    </linearGradient>
+
+    <!-- Drop Shadow for Handset -->
+    <filter id="handsetShadow" x="-10%" y="-10%" width="130%" height="130%">
+      <feDropShadow dx="0" dy="6" stdDeviation="8" flood-color="#0E5E22" flood-opacity="0.3"/>
+    </filter>
+  </defs>
+
+  <!-- Squircle Base -->
+  <rect x="16" y="16" width="480" height="480" rx="108" ry="108" fill="url(#phoneBgGrad)" />
+  <rect x="16" y="16" width="480" height="480" rx="108" ry="108" fill="url(#innerGlow)" />
+  <rect x="16" y="16" width="480" height="480" rx="108" ry="108" fill="none" stroke="#FFFFFF" stroke-opacity="0.22" stroke-width="2.5" />
+
+  <!-- Telephone Receiver Icon -->
+  <g filter="url(#handsetShadow)">
+    <path fill="url(#handsetGrad)" d="M182.2 135.1c-10.4-10.4-27.2-10.4-37.6 0l-28.7 28.7c-21.7 21.7-22.9 56.6-2.7 79.6 42.4 48.3 93.3 99.2 141.6 141.6 23 20.2 57.9 19 79.6-2.7l28.7-28.7c10.4-10.4 10.4-27.2 0-37.6l-50.5-50.5c-10.4-10.4-27.2-10.4-37.6 0l-16.1 16.1c-4.4 4.4-11 5.4-16.5 2.5-31.8-16.7-58.4-43.3-75.1-75.1-2.9-5.5-1.9-12.1 2.5-16.5l16.1-16.1c10.4-10.4 10.4-27.2 0-37.6l-49.8-50.7z"/>
+  </g>
+</svg>
