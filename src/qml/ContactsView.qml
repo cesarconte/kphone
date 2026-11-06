@@ -31,43 +31,53 @@ Item {
             spacing: 6
 
             delegate: Rectangle {
+                id: contactCard
                 width: contactsList.width
-                height: 56
-                radius: 10
+                height: 64
+                radius: 12
+
                 color: itemMouse.pressed 
                     ? (Kirigami.Theme.backgroundColor.hslLightness < 0.5 ? "#2C2C2E" : "#E5E5EA")
-                    : (itemMouse.containsMouse ? (Kirigami.Theme.backgroundColor.hslLightness < 0.5 ? "#1C1C1E" : "#F2F2F7") : "transparent")
+                    : (itemMouse.containsMouse 
+                        ? (Kirigami.Theme.backgroundColor.hslLightness < 0.5 ? "#28282A" : "#F2F2F5") 
+                        : (Kirigami.Theme.backgroundColor.hslLightness < 0.5 ? "#1C1C1E" : "#FFFFFF"))
+
+                border.color: Kirigami.Theme.backgroundColor.hslLightness < 0.5 ? "#2C2C2E" : "#E5E5EA"
+                border.width: 1
+
+                Behavior on color { ColorAnimation { duration: 120 } }
 
                 RowLayout {
                     anchors.fill: parent
-                    anchors.leftMargin: 8
-                    anchors.rightMargin: 8
-                    spacing: 12
+                    anchors.leftMargin: 14
+                    anchors.rightMargin: 14
+                    spacing: 14
 
-                    // Avatar
+                    // 1. Avatar (44x44)
                     Rectangle {
-                        width: 40
-                        height: 40
-                        radius: 20
+                        Layout.preferredWidth: 44
+                        Layout.preferredHeight: 44
+                        radius: 22
                         color: model.avatarColor
 
                         Text {
                             anchors.centerIn: parent
                             text: model.initials
-                            font.pixelSize: 15
+                            font.pixelSize: 16
                             font.weight: Font.Bold
-                            color: "white"
+                            color: "#FFFFFF"
                         }
                     }
 
-                    // Contact Info
+                    // 2. Contact Info
                     ColumnLayout {
                         Layout.fillWidth: true
+                        Layout.alignment: Qt.AlignVCenter
                         spacing: 2
 
                         Text {
                             text: model.name
-                            font.pixelSize: 14
+                            font.pixelSize: 15
                             font.weight: Font.DemiBold
                             color: Kirigami.Theme.textColor
                             elide: Text.ElideRight
@@ -76,7 +86,7 @@ Item {
 
                         Text {
                             text: model.formattedNumber.length > 0 ? model.formattedNumber : model.email
-                            font.pixelSize: 12
+                            font.pixelSize: 13
                             color: Kirigami.Theme.disabledTextColor
                             elide: Text.ElideRight
                             Layout.fillWidth: true
@@ -86,31 +96,37 @@ Item {
                     // Star if favorite
                     Kirigami.Icon {
                         source: "starred-symbolic"
-                        width: 16
-                        height: 16
+                        Layout.preferredWidth: 16
+                        Layout.preferredHeight: 16
                         color: "#FF9500"
                         visible: model.isFavorite
                     }
 
-                    // Quick call button
+                    // 3. Quick call button (40x40 tonal container)
                     Rectangle {
-                        width: 32
-                        height: 32
-                        radius: 16
-                        color: callMouse.pressed ? "#2DB84D" : "#34C759"
-                        visible: itemMouse.containsMouse
+                        Layout.preferredWidth: 40
+                        Layout.preferredHeight: 40
+                        radius: 20
+                        color: callMouse.pressed
+                            ? "#2DB84D"
+                            : (callMouse.containsMouse
+                                ? (Kirigami.Theme.backgroundColor.hslLightness < 0.5 ? "#224A2A" : "#DDF3E4")
+                                : (Kirigami.Theme.backgroundColor.hslLightness < 0.5 ? "#1A3820" : "#EAF7EE"))
+
+                        Behavior on color { ColorAnimation { duration: 120 } }
 
                         Kirigami.Icon {
                             source: "call-start"
-                            width: 16
-                            height: 16
-                            color: "white"
+                            width: 20
+                            height: 20
+                            color: callMouse.pressed ? "#FFFFFF" : "#34C759"
                             anchors.centerIn: parent
                         }
 
                         MouseArea {
                             id: callMouse
                             anchors.fill: parent
+                            hoverEnabled: true
                             onClicked: phoneController.startCall(model.number)
                         }
                     }

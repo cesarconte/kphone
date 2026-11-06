@@ -4,6 +4,7 @@
 #include <QStandardPaths>
 
 #include "../src/ContactsModel.h"
+#include "../src/FavoritesProxyModel.h"
 #include "../src/RecentsModel.h"
 #include "../src/PhoneController.h"
 
@@ -20,6 +21,7 @@ private slots:
     void testInitialsGeneration();
     void testContactFiltering();
     void testFavorites();
+    void testFavoritesProxyModel();
 
     // RecentsModel tests
     void testRecentsAddAndFilter();
@@ -79,6 +81,16 @@ void TestPhone::testFavorites()
     // Toggle favorite on dummy id should not crash
     model.toggleFavorite(QStringLiteral("dummy-contact-123"));
     model.toggleFavorite(QStringLiteral("dummy-contact-123"));
+}
+
+void TestPhone::testFavoritesProxyModel()
+{
+    ContactsModel contacts;
+    FavoritesProxyModel favorites;
+    favorites.setSourceModel(&contacts);
+
+    QVERIFY(favorites.rowCount() >= 0);
+    QCOMPARE(favorites.count(), favorites.rowCount());
 }
 
 void TestPhone::testRecentsAddAndFilter()

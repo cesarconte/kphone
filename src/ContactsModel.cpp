@@ -150,7 +150,6 @@ void ContactsModel::saveFavorites()
 
 void ContactsModel::loadFromVcards()
 {
-    beginResetModel();
     m_allContacts.clear();
 
     const QString homePath = QDir::homePath();
@@ -229,12 +228,12 @@ void ContactsModel::loadFromVcards()
     });
 
     applyFilter();
-    endResetModel();
     Q_EMIT countChanged();
 }
 
 void ContactsModel::applyFilter()
 {
+    beginResetModel();
     m_filteredContacts.clear();
     const QString cleanFilter = m_filter.trimmed();
 
@@ -246,6 +245,7 @@ void ContactsModel::applyFilter()
             m_filteredContacts.append(c);
         }
     }
+    endResetModel();
     Q_EMIT countChanged();
 }
 

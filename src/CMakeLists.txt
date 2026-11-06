@@ -4,6 +4,7 @@ set(kphone_SRCS
     PhoneController.cpp
     ContactsModel.h
     ContactsModel.cpp
+    FavoritesProxyModel.h
     RecentsModel.h
     RecentsModel.cpp
     DtmfGenerator.h

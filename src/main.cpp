@@ -10,6 +10,7 @@
 
 #include "PhoneController.h"
 #include "ContactsModel.h"
+#include "FavoritesProxyModel.h"
 #include "RecentsModel.h"
 
 int main(int argc, char *argv[])
@@ -35,6 +36,9 @@ int main(int argc, char *argv[])
     parser.process(app);
 
     auto *contactsModel = new ContactsModel(&app);
+    auto *favoritesModel = new FavoritesProxyModel(&app);
+    favoritesModel->setSourceModel(contactsModel);
+
     auto *recentsModel = new RecentsModel(&app);
     auto *phoneController = new PhoneController(contactsModel, recentsModel, &app);
 
@@ -55,6 +59,7 @@ int main(int argc, char *argv[])
     QQmlApplicationEngine engine;
     KLocalization::setupLocalizedContext(&engine);
     engine.rootContext()->setContextProperty(QStringLiteral("contactsModel"), contactsModel);
+    engine.rootContext()->setContextProperty(QStringLiteral("favoritesModel"), favoritesModel);
     engine.rootContext()->setContextProperty(QStringLiteral("recentsModel"), recentsModel);
     engine.rootContext()->setContextProperty(QStringLiteral("phoneController"), phoneController);
 

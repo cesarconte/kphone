@@ -1,6 +1,7 @@
 add_executable(test_phone
     test_phone.cpp
     ../src/ContactsModel.cpp
+    ../src/FavoritesProxyModel.h
     ../src/RecentsModel.cpp
     ../src/PhoneController.cpp
     ../src/DtmfGenerator.cpp
