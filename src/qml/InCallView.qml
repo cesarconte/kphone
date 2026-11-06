@@ -46,15 +46,50 @@ Rectangle {
 
             Text {
                 text: {
-                    if (phoneController.callState === 1) return i18n("Llamando...");
+                    if (phoneController.callState === 1) return i18n("Marcando...");
                     if (phoneController.callState === 2) return i18n("Llamada entrante...");
                     if (phoneController.callState === 3) return phoneController.formattedDuration;
                     if (phoneController.callState === 4) return i18n("Llamada finalizada");
                     return "";
                 }
-                font.pixelSize: 14
-                color: phoneController.callState === 4 ? "#FF3B30" : Kirigami.Theme.disabledTextColor
+                font.pixelSize: phoneController.callState === 3 ? 18 : 14
+                font.weight: phoneController.callState === 3 ? Font.Bold : Font.Normal
+                color: phoneController.callState === 4 ? "#FF3B30" : (phoneController.callState === 3 ? Kirigami.Theme.highlightColor : Kirigami.Theme.disabledTextColor)
                 Layout.alignment: Qt.AlignHCenter
+            }
+
+            // Subtitle hint while Dialing
+            Rectangle {
+                visible: phoneController.callState === 1
+                Layout.alignment: Qt.AlignHCenter
+                Layout.preferredHeight: 28
+                radius: 14
+                color: hintMouse.pressed ? "#48484A" : (Kirigami.Theme.backgroundColor.hslLightness < 0.5 ? "#2C2C2E" : "#E5E5EA")
+                Layout.preferredWidth: hintLayout.implicitWidth + 24
+
+                RowLayout {
+                    id: hintLayout
+                    anchors.centerIn: parent
+                    spacing: 6
+
+                    Rectangle {
+                        width: 6; height: 6; radius: 3; color: "#34C759"
+                    }
+
+                    Text {
+                        text: phoneController.connectedDeviceName.length > 0 
+                            ? i18n("Inicia la llamada en tu %1", phoneController.connectedDeviceName) 
+                            : i18n("Pulsa para activar contador")
+                        font.pixelSize: 11
+                        color: Kirigami.Theme.textColor
+                    }
+                }
+
+                MouseArea {
+                    id: hintMouse
+                    anchors.fill: parent
+                    onClicked: phoneController.markCallConnected()
+                }
             }
         }
 
@@ -194,10 +229,12 @@ Rectangle {
             Layout.bottomMargin: 16
 
             Kirigami.Icon {
-                source: "call-stop"
+                source: "call-start"
                 width: 32
                 height: 32
-                color: "white"
+                color: "#FFFFFF"
+                isMask: true
+                rotation: 135
                 anchors.centerIn: parent
             }
 

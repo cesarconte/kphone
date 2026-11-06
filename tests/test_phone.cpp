@@ -146,7 +146,8 @@ void TestPhone::testCallLifecycle()
     phone.startCall();
     QCOMPARE(phone.callState(), static_cast<int>(PhoneController::Dialing));
 
-    phone.answerCall();
+    // Verify markCallConnected transitions to Active and starts duration
+    phone.markCallConnected();
     QCOMPARE(phone.callState(), static_cast<int>(PhoneController::Active));
 
     phone.endCall();

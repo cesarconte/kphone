@@ -53,6 +53,7 @@ public:
     Q_INVOKABLE void deleteDigit();
     Q_INVOKABLE void clearNumber();
     Q_INVOKABLE void startCall(const QString &targetNumber = QString());
+    Q_INVOKABLE void markCallConnected();
     Q_INVOKABLE void endCall();
     Q_INVOKABLE void answerCall();
     Q_INVOKABLE void toggleMute();

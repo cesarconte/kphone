@@ -151,18 +151,20 @@ void PhoneController::startCall(const QString &targetNumber)
         QDesktopServices::openUrl(QUrl(QStringLiteral("tel:%1").arg(numberToCall)));
     }
 
-    // Update state to Dialing, then Active
+    // Set state to Dialing (waiting for confirmation / connect on phone)
     setCallState(Dialing);
     m_callDuration = 0;
     Q_EMIT callDurationChanged();
+}
 
-    // Simulate transition to active call after 2 seconds
-    QTimer::singleShot(2200, this, [this]() {
-        if (m_callState == Dialing) {
-            setCallState(Active);
-            m_callTimer.start();
-        }
-    });
+void PhoneController::markCallConnected()
+{
+    if (m_callState == Dialing || m_callState == Ringing) {
+        setCallState(Active);
+        m_callDuration = 0;
+        m_callTimer.start();
+        Q_EMIT callDurationChanged();
+    }
 }
 
 void PhoneController::endCall()
@@ -319,14 +321,20 @@ void PhoneController::onTelephonyCallReceived(const QString &event, const QStrin
         Q_EMIT dialedNumberChanged();
         Q_EMIT formattedNumberChanged();
         Q_EMIT activeContactNameChanged();
+    } else if (event == QStringLiteral("talking")) {
+        if (m_callState != Active) {
+            setCallState(Active);
+            m_callDuration = 0;
+            m_callTimer.start();
+            Q_EMIT callDurationChanged();
+        }
     } else if (event == QStringLiteral("missedCall")) {
         if (m_recentsModel) {
             m_recentsModel->addCall(contactName, number, 2, 0); // 2 = Missed
         }
-        setCallState(Idle);
-    } else if (event == QStringLiteral("talking")) {
-        setCallState(Active);
-        m_callTimer.start();
+        endCall();
+    } else if (event == QStringLiteral("callEnded") || event == QStringLiteral("idle")) {
+        endCall();
     }
 }
 
