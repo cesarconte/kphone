@@ -305,7 +305,10 @@ void PhoneController::updateKdeConnectStatus()
         QDBusConnection::sessionBus()
     );
     if (batteryIface.isValid()) {
-        m_deviceBattery = batteryIface.property("currentCharge").toInt();
+        const QVariant chargeVar = batteryIface.property("currentCharge");
+        m_deviceBattery = (chargeVar.isValid() && chargeVar.toInt() > 0) ? chargeVar.toInt() : -1;
+    } else {
+        m_deviceBattery = -1;
     }
 
     // Hook telephony signal for this device

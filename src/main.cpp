@@ -1,6 +1,8 @@
 #include <QGuiApplication>
 #include <QQmlApplicationEngine>
 #include <QQmlContext>
+#include <QQuickWindow>
+#include <QTimer>
 #include <QIcon>
 #include <QCommandLineParser>
 #include <QLoggingCategory>
@@ -33,6 +35,10 @@ int main(int argc, char *argv[])
     parser.addHelpOption();
     parser.addVersionOption();
     parser.addPositionalArgument(QStringLiteral("url_or_number"), QStringLiteral("Phone number or tel: URL to dial"));
+    QCommandLineOption screenshotOpt(QStringLiteral("screenshot"),
+                                     QStringLiteral("Capture window screenshot and exit"),
+                                     QStringLiteral("path"));
+    parser.addOption(screenshotOpt);
     parser.process(app);
 
     auto *contactsModel = new ContactsModel(&app);
@@ -57,6 +63,7 @@ int main(int argc, char *argv[])
     }
 
     QQmlApplicationEngine engine;
+    engine.addImportPath(QStringLiteral("/home/cesar/.local/lib/qt6/qml"));
     KLocalization::setupLocalizedContext(&engine);
     engine.rootContext()->setContextProperty(QStringLiteral("contactsModel"), contactsModel);
     engine.rootContext()->setContextProperty(QStringLiteral("favoritesModel"), favoritesModel);
@@ -71,6 +78,17 @@ int main(int argc, char *argv[])
     }, Qt::QueuedConnection);
 
     engine.load(url);
+
+    if (parser.isSet(screenshotOpt) && !engine.rootObjects().isEmpty()) {
+        if (auto *win = qobject_cast<QQuickWindow *>(engine.rootObjects().first())) {
+            const QString outPath = parser.value(screenshotOpt);
+            QTimer::singleShot(350, win, [win, outPath, &app]() {
+                const QImage img = win->grabWindow();
+                img.save(outPath);
+                app.quit();
+            });
+        }
+    }
 
     return app.exec();
 }

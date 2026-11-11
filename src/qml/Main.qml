@@ -2,197 +2,179 @@ import QtQuick
 import QtQuick.Controls as QQC2
 import QtQuick.Layouts
 import org.kde.kirigami as Kirigami
+import CachyOS.UI
 
-Kirigami.ApplicationWindow {
+CachyWindow {
     id: appWindow
     title: i18n("Teléfono")
-    width: Kirigami.Units.gridUnit * 22
-    height: Kirigami.Units.gridUnit * 36
-    minimumWidth: Math.max(Kirigami.Units.gridUnit * 19, (viewStack.currentItem && viewStack.currentItem.implicitWidth > 0 ? viewStack.currentItem.implicitWidth : 0))
-    minimumHeight: Math.max(Kirigami.Units.gridUnit * 30, (viewStack.currentItem && viewStack.currentItem.implicitHeight > 0 ? viewStack.currentItem.implicitHeight + (header ? header.implicitHeight : 0) + (footer ? footer.implicitHeight : 0) : 0))
+    width: 396
+    height: 640
+    minimumWidth: 350
+    minimumHeight: 540
 
-    // Top Device Status Bar
-    header: QQC2.ToolBar {
-        background: Rectangle {
-            color: Kirigami.Theme.backgroundColor.hslLightness < 0.5 ? "#1C1C1E" : "#F8F8F8"
-            border.color: Kirigami.Theme.backgroundColor.hslLightness < 0.5 ? "#2C2C2E" : "#E5E5EA"
+    showTrafficLights: true
+    showTitleBarDivider: true
+    showWindowFrame: true
+    resizable: true
+    cornerRadius: CachyTheme.radiusWindow
+
+    // Golden Gate Centered Device Connection & Battery Pill
+    headerCenter: [
+        Rectangle {
+            anchors.centerIn: parent
+            height: 26
+            width: Math.min(parent.width, statusRow.implicitWidth + 20)
+            radius: 13
+            color: CachyTheme.surfacePill
             border.width: 1
-        }
+            border.color: CachyTheme.specularBorder
 
-        RowLayout {
-            anchors.fill: parent
-            anchors.leftMargin: 16
-            anchors.rightMargin: 16
-
-            // Status Indicator Dot
-            Rectangle {
-                Layout.preferredWidth: 8
-                Layout.preferredHeight: 8
-                radius: 4
-                color: phoneController.isDeviceConnected ? "#34C759" : "#FF9500"
-            }
-
-            // Device Name
-            Text {
-                text: phoneController.connectedDeviceName
-                font.pixelSize: 12
-                font.weight: Font.DemiBold
-                color: Kirigami.Theme.textColor
-                Layout.fillWidth: true
-                elide: Text.ElideRight
-            }
-
-            // Battery %
             RowLayout {
-                spacing: 4
-                visible: phoneController.deviceBattery >= 0
+                id: statusRow
+                anchors.fill: parent
+                anchors.leftMargin: 10
+                anchors.rightMargin: 10
+                spacing: 6
+
+                Rectangle {
+                    Layout.preferredWidth: 8
+                    Layout.preferredHeight: 8
+                    radius: 4
+                    color: phoneController.isDeviceConnected ? "#34C759" : "#FF9500"
+                }
 
                 Text {
+                    text: phoneController.connectedDeviceName
+                    font.pixelSize: 12
+                    font.weight: Font.DemiBold
+                    color: CachyTheme.textPrimary
+                    Layout.fillWidth: true
+                    elide: Text.ElideRight
+                }
+
+                Text {
+                    visible: phoneController.deviceBattery >= 0
                     text: phoneController.deviceBattery + "%"
                     font.pixelSize: 11
-                    color: Kirigami.Theme.disabledTextColor
-                }
-
-                Kirigami.Icon {
-                    source: "battery"
-                    Layout.preferredWidth: 14
-                    Layout.preferredHeight: 14
-                    color: Kirigami.Theme.disabledTextColor
+                    color: CachyTheme.textSecondary
                 }
             }
+        }
+    ]
 
-            // Quick Mirroring Action Icon
-            Rectangle {
-                Layout.preferredWidth: 26
-                Layout.preferredHeight: 26
-                radius: 6
-                color: mirrorMouse.pressed ? "#48484A" : "transparent"
+    // Trailing Quick Phone Mirroring Button (Launches kphonemirroring)
+    headerActions: [
+        RowLayout {
+            anchors.verticalCenter: parent.verticalCenter
+            spacing: 6
 
-                Kirigami.Icon {
-                    source: "kphonemirroring"
-                    width: 16
-                    height: 16
-                    anchors.centerIn: parent
-                }
+            CachyToolbarButton {
+                text: "📱"
+                tooltipText: i18n("Abrir iPhone / Android Mirroring (kphonemirroring)")
+                onClicked: phoneController.openPhoneMirroring()
+            }
+        }
+    ]
 
-                MouseArea {
-                    id: mirrorMouse
+    contentData: [
+        ColumnLayout {
+            anchors.fill: parent
+            spacing: 0
+
+            // Main Content Stack + InCall Overlay
+            Item {
+                Layout.fillWidth: true
+                Layout.fillHeight: true
+                clip: true
+
+                StackLayout {
+                    id: viewStack
                     anchors.fill: parent
-                    onClicked: phoneController.openPhoneMirroring()
+                    currentIndex: mainTabBar.currentIndex
+
+                    FavoritesView {}
+                    RecentsView {}
+                    ContactsView {}
+                    KeypadView {}
+                }
+
+                InCallView {
+                    anchors.fill: parent
+                    visible: phoneController.callState !== 0
+                    z: 99
+                }
+            }
+
+            // Golden Gate 1px Bottom Divider
+            Rectangle {
+                Layout.fillWidth: true
+                height: 1
+                visible: phoneController.callState === 0
+                color: CachyTheme.hardDividerColor
+            }
+
+            // Bottom Golden Gate Segmented Phone Tab Bar
+            Rectangle {
+                id: mainTabBar
+                property int currentIndex: 3 // Default to Keypad
+                Layout.fillWidth: true
+                Layout.preferredHeight: 58
+                visible: phoneController.callState === 0
+                color: CachyTheme.sidebarBackground
+
+                RowLayout {
+                    anchors.fill: parent
+                    anchors.leftMargin: 12
+                    anchors.rightMargin: 12
+                    spacing: 6
+
+                    Repeater {
+                        model: [
+                            { index: 0, label: i18n("Favoritos"), icon: "starred-symbolic" },
+                            { index: 1, label: i18n("Recientes"), icon: "clock" },
+                            { index: 2, label: i18n("Contactos"), icon: "user-identity" },
+                            { index: 3, label: i18n("Teclado"), icon: "input-dialpad" }
+                        ]
+
+                        Rectangle {
+                            required property var modelData
+                            readonly property bool isCurrent: mainTabBar.currentIndex === modelData.index
+
+                            Layout.fillWidth: true
+                            Layout.preferredHeight: 44
+                            radius: 12
+                            color: isCurrent
+                                ? CachyTheme.withAlpha(CachyTheme.accentColor, CachyTheme.isDark ? 0.22 : 0.14)
+                                : (tabHover.hovered ? CachyTheme.cardBackgroundHover : "transparent")
+
+                            HoverHandler { id: tabHover; cursorShape: Qt.PointingHandCursor }
+                            TapHandler { onTapped: mainTabBar.currentIndex = modelData.index }
+
+                            ColumnLayout {
+                                anchors.centerIn: parent
+                                spacing: 2
+
+                                Kirigami.Icon {
+                                    source: modelData.icon
+                                    Layout.preferredWidth: 18
+                                    Layout.preferredHeight: 18
+                                    color: isCurrent ? CachyTheme.accentColor : CachyTheme.textSecondary
+                                    Layout.alignment: Qt.AlignHCenter
+                                }
+
+                                Text {
+                                    text: modelData.label
+                                    font.pixelSize: 10
+                                    font.weight: isCurrent ? Font.Bold : Font.Medium
+                                    color: isCurrent ? CachyTheme.accentColor : CachyTheme.textSecondary
+                                    elide: Text.ElideRight
+                                    Layout.alignment: Qt.AlignHCenter
+                                }
+                            }
+                        }
+                    }
                 }
             }
         }
-    }
-
-    // Main Tab Views
-    StackLayout {
-        id: viewStack
-        anchors.fill: parent
-        currentIndex: mainTabBar.currentIndex
-
-        FavoritesView {}
-        RecentsView {}
-        ContactsView {}
-        KeypadView {}
-    }
-
-    // In-Call Screen Overlay
-    InCallView {
-        anchors.fill: parent
-        visible: phoneController.callState !== 0
-        z: 99
-    }
-
-    // Bottom macOS Phone Tab Bar
-    footer: QQC2.TabBar {
-        id: mainTabBar
-        currentIndex: 3 // Default to Keypad
-        visible: phoneController.callState === 0
-
-        background: Rectangle {
-            color: Kirigami.Theme.backgroundColor.hslLightness < 0.5 ? "#1C1C1E" : "#F8F8F8"
-            border.color: Kirigami.Theme.backgroundColor.hslLightness < 0.5 ? "#2C2C2E" : "#E5E5EA"
-            border.width: 1
-        }
-
-        QQC2.TabButton {
-            contentItem: ColumnLayout {
-                spacing: 2
-                Kirigami.Icon {
-                    source: "starred-symbolic"
-                    width: 20
-                    height: 20
-                    color: mainTabBar.currentIndex === 0 ? Kirigami.Theme.highlightColor : Kirigami.Theme.disabledTextColor
-                    Layout.alignment: Qt.AlignHCenter
-                }
-                Text {
-                    text: i18n("Favoritos")
-                    font.pixelSize: 10
-                    font.weight: mainTabBar.currentIndex === 0 ? Font.DemiBold : Font.Normal
-                    color: mainTabBar.currentIndex === 0 ? Kirigami.Theme.highlightColor : Kirigami.Theme.disabledTextColor
-                    Layout.alignment: Qt.AlignHCenter
-                }
-            }
-        }
-
-        QQC2.TabButton {
-            contentItem: ColumnLayout {
-                spacing: 2
-                Kirigami.Icon {
-                    source: "clock"
-                    width: 20
-                    height: 20
-                    color: mainTabBar.currentIndex === 1 ? Kirigami.Theme.highlightColor : Kirigami.Theme.disabledTextColor
-                    Layout.alignment: Qt.AlignHCenter
-                }
-                Text {
-                    text: i18n("Recientes")
-                    font.pixelSize: 10
-                    font.weight: mainTabBar.currentIndex === 1 ? Font.DemiBold : Font.Normal
-                    color: mainTabBar.currentIndex === 1 ? Kirigami.Theme.highlightColor : Kirigami.Theme.disabledTextColor
-                    Layout.alignment: Qt.AlignHCenter
-                }
-            }
-        }
-
-        QQC2.TabButton {
-            contentItem: ColumnLayout {
-                spacing: 2
-                Kirigami.Icon {
-                    source: "user-identity"
-                    width: 20
-                    height: 20
-                    color: mainTabBar.currentIndex === 2 ? Kirigami.Theme.highlightColor : Kirigami.Theme.disabledTextColor
-                    Layout.alignment: Qt.AlignHCenter
-                }
-                Text {
-                    text: i18n("Contactos")
-                    font.pixelSize: 10
-                    font.weight: mainTabBar.currentIndex === 2 ? Font.DemiBold : Font.Normal
-                    color: mainTabBar.currentIndex === 2 ? Kirigami.Theme.highlightColor : Kirigami.Theme.disabledTextColor
-                    Layout.alignment: Qt.AlignHCenter
-                }
-            }
-        }
-
-        QQC2.TabButton {
-            contentItem: ColumnLayout {
-                spacing: 2
-                Kirigami.Icon {
-                    source: "input-dialpad"
-                    width: 20
-                    height: 20
-                    color: mainTabBar.currentIndex === 3 ? Kirigami.Theme.highlightColor : Kirigami.Theme.disabledTextColor
-                    Layout.alignment: Qt.AlignHCenter
-                }
-                Text {
-                    text: i18n("Teclado")
-                    font.pixelSize: 10
-                    font.weight: mainTabBar.currentIndex === 3 ? Font.DemiBold : Font.Normal
-                    color: mainTabBar.currentIndex === 3 ? Kirigami.Theme.highlightColor : Kirigami.Theme.disabledTextColor
-                    Layout.alignment: Qt.AlignHCenter
-                }
-            }
-        }
-    }
+    ]
 }
