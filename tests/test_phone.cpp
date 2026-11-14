@@ -46,6 +46,7 @@ void TestPhone::initTestCase()
     m_tempDir = std::make_unique<QTemporaryDir>();
     QVERIFY(m_tempDir->isValid());
     qputenv("XDG_DATA_HOME", m_tempDir->path().toUtf8());
+    qputenv("KPHONE_TEST_MODE", "1");
 }
 
 void TestPhone::cleanupTestCase()

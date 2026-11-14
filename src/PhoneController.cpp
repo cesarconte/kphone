@@ -156,8 +156,10 @@ void PhoneController::startCall(const QString &targetNumber)
     Q_EMIT activeContactNameChanged();
 
     // Dispatch directly via kdeconnect-handler to communicate with smartphone
-    if (!QProcess::startDetached(QStringLiteral("kdeconnect-handler"), {QStringLiteral("tel:%1").arg(numberToCall)})) {
-        QDesktopServices::openUrl(QUrl(QStringLiteral("tel:%1").arg(numberToCall)));
+    if (!qEnvironmentVariableIsSet("KPHONE_TEST_MODE")) {
+        if (!QProcess::startDetached(QStringLiteral("kdeconnect-handler"), {QStringLiteral("tel:%1").arg(numberToCall)})) {
+            QDesktopServices::openUrl(QUrl(QStringLiteral("tel:%1").arg(numberToCall)));
+        }
     }
 
     // Set state to Dialing (waiting for confirmation / connect on phone)

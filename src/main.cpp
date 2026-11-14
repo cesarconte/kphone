@@ -26,7 +26,7 @@ int main(int argc, char *argv[])
     app.setApplicationDisplayName(QStringLiteral("Teléfono"));
     app.setOrganizationDomain(QStringLiteral("cesar.org"));
     app.setOrganizationName(QStringLiteral("Cesar"));
-    app.setWindowIcon(QIcon(QStringLiteral(":/resources/icons/kphone.svg")));
+    app.setWindowIcon(QIcon::fromTheme(QStringLiteral("kphone"), QIcon(QStringLiteral(":/resources/icons/kphone.svg"))));
 
     KLocalizedString::setApplicationDomain("kphone");
 
