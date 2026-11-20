@@ -63,7 +63,7 @@ int main(int argc, char *argv[])
     }
 
     QQmlApplicationEngine engine;
-    engine.addImportPath(QStringLiteral("/home/cesar/.local/lib/qt6/qml"));
+    engine.addImportPath(QStringLiteral("/usr/lib/qt6/qml"));
     KLocalization::setupLocalizedContext(&engine);
     engine.rootContext()->setContextProperty(QStringLiteral("contactsModel"), contactsModel);
     engine.rootContext()->setContextProperty(QStringLiteral("favoritesModel"), favoritesModel);

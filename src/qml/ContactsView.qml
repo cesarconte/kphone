@@ -1,7 +1,7 @@
 import QtQuick
 import QtQuick.Controls as QQC2
 import QtQuick.Layouts
-import org.kde.kirigami as Kirigami
+import CachyOS.UI
 
 Item {
     id: root
@@ -10,11 +10,11 @@ Item {
 
     ColumnLayout {
         anchors.fill: parent
-        anchors.margins: 12
-        spacing: 10
+        anchors.margins: CachyTheme.marginWindow
+        spacing: CachyTheme.spacingMedium
 
         // Search Bar
-        Kirigami.SearchField {
+        CachySearchField {
             id: searchField
             Layout.fillWidth: true
             placeholderText: i18n("Buscar contactos...")
@@ -28,21 +28,21 @@ Item {
             Layout.fillHeight: true
             clip: true
             model: contactsModel
-            spacing: 6
+            spacing: CachyTheme.spacingSmall
 
             delegate: Rectangle {
                 id: contactCard
                 width: contactsList.width
                 height: 64
-                radius: 12
+                radius: CachyTheme.radiusMedium
 
                 color: itemMouse.pressed 
-                    ? (Kirigami.Theme.backgroundColor.hslLightness < 0.5 ? "#2C2C2E" : "#E5E5EA")
+                    ? (CachyTheme.isDark ? "#2C2C2E" : "#E5E5EA")
                     : (itemMouse.containsMouse 
-                        ? (Kirigami.Theme.backgroundColor.hslLightness < 0.5 ? "#28282A" : "#F2F2F5") 
-                        : (Kirigami.Theme.backgroundColor.hslLightness < 0.5 ? "#1C1C1E" : "#FFFFFF"))
+                        ? (CachyTheme.isDark ? "#28282A" : "#F2F2F5") 
+                        : (CachyTheme.isDark ? "#1C1C1E" : "#FFFFFF"))
 
-                border.color: Kirigami.Theme.backgroundColor.hslLightness < 0.5 ? "#2C2C2E" : "#E5E5EA"
+                border.color: CachyPalette.specularBorder
                 border.width: 1
 
                 Behavior on color { ColorAnimation { duration: 120 } }
@@ -79,7 +79,7 @@ Item {
                             text: model.name
                             font.pixelSize: 15
                             font.weight: Font.DemiBold
-                            color: Kirigami.Theme.textColor
+                            color: CachyTheme.textPrimary
                             elide: Text.ElideRight
                             Layout.fillWidth: true
                         }
@@ -87,17 +87,16 @@ Item {
                         Text {
                             text: model.formattedNumber.length > 0 ? model.formattedNumber : model.email
                             font.pixelSize: 13
-                            color: Kirigami.Theme.disabledTextColor
+                            color: CachyTheme.textSecondary
                             elide: Text.ElideRight
                             Layout.fillWidth: true
                         }
                     }
 
                     // Star if favorite
-                    Kirigami.Icon {
-                        source: "starred-symbolic"
-                        Layout.preferredWidth: 16
-                        Layout.preferredHeight: 16
+                    CachyIcon {
+                        name: "starred-symbolic"
+                        size: 16
                         color: "#FF9500"
                         visible: model.isFavorite
                     }
@@ -110,15 +109,14 @@ Item {
                         color: callMouse.pressed
                             ? "#2DB84D"
                             : (callMouse.containsMouse
-                                ? (Kirigami.Theme.backgroundColor.hslLightness < 0.5 ? "#224A2A" : "#DDF3E4")
-                                : (Kirigami.Theme.backgroundColor.hslLightness < 0.5 ? "#1A3820" : "#EAF7EE"))
+                                ? (CachyTheme.isDark ? "#224A2A" : "#DDF3E4")
+                                : (CachyTheme.isDark ? "#1A3820" : "#EAF7EE"))
 
                         Behavior on color { ColorAnimation { duration: 120 } }
 
-                        Kirigami.Icon {
-                            source: "call-start"
-                            width: 20
-                            height: 20
+                        CachyIcon {
+                            name: "call-start"
+                            size: 20
                             color: callMouse.pressed ? "#FFFFFF" : "#34C759"
                             anchors.centerIn: parent
                         }
@@ -127,6 +125,7 @@ Item {
                             id: callMouse
                             anchors.fill: parent
                             hoverEnabled: true
+                            cursorShape: Qt.PointingHandCursor
                             onClicked: phoneController.startCall(model.number)
                         }
                     }
@@ -136,6 +135,7 @@ Item {
                     id: itemMouse
                     anchors.fill: parent
                     hoverEnabled: true
+                    cursorShape: Qt.PointingHandCursor
                     onClicked: {
                         root.selectedContact = {
                             id: model.id,
@@ -154,22 +154,30 @@ Item {
         }
     }
 
+    CachyPlaceholderMessage {
+        anchors.centerIn: parent
+        width: parent.width - 48
+        visible: contactsModel.count === 0
+        iconName: "user-identity"
+        text: searchField.text.length > 0 ? i18n("No se encontraron contactos para \"%1\"", searchField.text) : i18n("Sin contactos")
+    }
+
     // Contact Details Modal Dialog
-    Kirigami.Dialog {
+    CachyDialog {
         id: contactDialog
         title: ""
-        width: Math.min(parent.width - 32, 340)
-        padding: 16
-        showCloseButton: true
+        preferredWidth: 340
+        showCancelButton: true
+        cancelText: i18n("Cerrar")
 
         ColumnLayout {
+            Layout.fillWidth: true
             spacing: 16
-            width: parent.width
 
             // Large Avatar
             Rectangle {
-                width: 72
-                height: 72
+                Layout.preferredWidth: 72
+                Layout.preferredHeight: 72
                 radius: 36
                 color: root.selectedContact ? root.selectedContact.avatarColor : "#007AFF"
                 Layout.alignment: Qt.AlignHCenter
@@ -188,7 +196,7 @@ Item {
                 text: root.selectedContact ? root.selectedContact.name : ""
                 font.pixelSize: 18
                 font.weight: Font.Bold
-                color: Kirigami.Theme.textColor
+                color: CachyTheme.textPrimary
                 Layout.alignment: Qt.AlignHCenter
                 horizontalAlignment: Text.AlignHCenter
                 Layout.fillWidth: true
@@ -203,95 +211,95 @@ Item {
                 ColumnLayout {
                     spacing: 4
                     Rectangle {
-                        width: 44
-                        height: 44
+                        Layout.preferredWidth: 44
+                        Layout.preferredHeight: 44
                         radius: 22
                         color: "#34C759"
-                        Kirigami.Icon {
-                            source: "call-start"
-                            width: 22
-                            height: 22
+                        CachyIcon {
+                            name: "call-start"
+                            size: 22
                             color: "white"
                             anchors.centerIn: parent
                         }
                         MouseArea {
                             anchors.fill: parent
+                            cursorShape: Qt.PointingHandCursor
                             onClicked: {
                                 contactDialog.close();
                                 phoneController.startCall(root.selectedContact.number);
                             }
                         }
                     }
-                    Text { text: i18n("Llamar"); font.pixelSize: 11; color: Kirigami.Theme.textColor; Layout.alignment: Qt.AlignHCenter }
+                    Text { text: i18n("Llamar"); font.pixelSize: 11; color: CachyTheme.textPrimary; Layout.alignment: Qt.AlignHCenter }
                 }
 
                 // Mensaje (SMS)
                 ColumnLayout {
                     spacing: 4
                     Rectangle {
-                        width: 44
-                        height: 44
+                        Layout.preferredWidth: 44
+                        Layout.preferredHeight: 44
                         radius: 22
                         color: "#007AFF"
-                        Kirigami.Icon {
-                            source: "message-new"
-                            width: 20
-                            height: 20
+                        CachyIcon {
+                            name: "message-new"
+                            size: 20
                             color: "white"
                             anchors.centerIn: parent
                         }
                         MouseArea {
                             anchors.fill: parent
+                            cursorShape: Qt.PointingHandCursor
                             onClicked: {
                                 phoneController.openSms(root.selectedContact.number);
                             }
                         }
                     }
-                    Text { text: i18n("Mensaje"); font.pixelSize: 11; color: Kirigami.Theme.textColor; Layout.alignment: Qt.AlignHCenter }
+                    Text { text: i18n("Mensaje"); font.pixelSize: 11; color: CachyTheme.textPrimary; Layout.alignment: Qt.AlignHCenter }
                 }
 
                 // Duplicación (Mirroring)
                 ColumnLayout {
                     spacing: 4
                     Rectangle {
-                        width: 44
-                        height: 44
+                        Layout.preferredWidth: 44
+                        Layout.preferredHeight: 44
                         radius: 22
                         color: "#5856D6"
-                        Kirigami.Icon {
-                            source: "kphonemirroring"
-                            width: 22
-                            height: 22
+                        CachyIcon {
+                            name: "smartphone"
+                            size: 22
                             color: "white"
                             anchors.centerIn: parent
                         }
                         MouseArea {
                             anchors.fill: parent
+                            cursorShape: Qt.PointingHandCursor
                             onClicked: {
                                 phoneController.openPhoneMirroring();
                             }
                         }
                     }
-                    Text { text: i18n("Pantalla"); font.pixelSize: 11; color: Kirigami.Theme.textColor; Layout.alignment: Qt.AlignHCenter }
+                    Text { text: i18n("Pantalla"); font.pixelSize: 11; color: CachyTheme.textPrimary; Layout.alignment: Qt.AlignHCenter }
                 }
 
                 // Favorito
                 ColumnLayout {
                     spacing: 4
                     Rectangle {
-                        width: 44
-                        height: 44
+                        Layout.preferredWidth: 44
+                        Layout.preferredHeight: 44
                         radius: 22
-                        color: root.selectedContact && root.selectedContact.isFavorite ? "#FF9500" : (Kirigami.Theme.backgroundColor.hslLightness < 0.5 ? "#3A3A3C" : "#E5E5EA")
-                        Kirigami.Icon {
-                            source: "starred-symbolic"
-                            width: 20
-                            height: 20
-                            color: root.selectedContact && root.selectedContact.isFavorite ? "white" : Kirigami.Theme.textColor
+                        color: root.selectedContact && root.selectedContact.isFavorite ? "#FF9500" : (CachyTheme.isDark ? "#3A3A3C" : "#E5E5EA")
+                        CachyIcon {
+                            name: "starred-symbolic"
+                            size: 20
+                            color: root.selectedContact && root.selectedContact.isFavorite ? "white" : CachyTheme.textPrimary
                             anchors.centerIn: parent
                         }
                         MouseArea {
                             anchors.fill: parent
+                            cursorShape: Qt.PointingHandCursor
                             onClicked: {
                                 if (root.selectedContact) {
                                     contactsModel.toggleFavorite(root.selectedContact.id);
@@ -300,7 +308,7 @@ Item {
                             }
                         }
                     }
-                    Text { text: i18n("Favorito"); font.pixelSize: 11; color: Kirigami.Theme.textColor; Layout.alignment: Qt.AlignHCenter }
+                    Text { text: i18n("Favorito"); font.pixelSize: 11; color: CachyTheme.textPrimary; Layout.alignment: Qt.AlignHCenter }
                 }
             }
 
@@ -308,8 +316,8 @@ Item {
             Rectangle {
                 Layout.fillWidth: true
                 height: 70
-                radius: 10
-                color: Kirigami.Theme.backgroundColor.hslLightness < 0.5 ? "#2C2C2E" : "#F2F2F7"
+                radius: CachyTheme.radiusMedium
+                color: CachyTheme.isDark ? "#2C2C2E" : "#F2F2F7"
 
                 ColumnLayout {
                     anchors.fill: parent
@@ -319,14 +327,14 @@ Item {
                     Text {
                         text: i18n("Teléfono móvil")
                         font.pixelSize: 11
-                        color: Kirigami.Theme.disabledTextColor
+                        color: CachyTheme.textSecondary
                     }
 
                     Text {
                         text: root.selectedContact ? root.selectedContact.formattedNumber : ""
                         font.pixelSize: 15
                         font.weight: Font.DemiBold
-                        color: Kirigami.Theme.highlightColor
+                        color: CachyTheme.accentColor
                     }
                 }
             }

@@ -1,57 +1,30 @@
 import QtQuick
 import QtQuick.Controls as QQC2
 import QtQuick.Layouts
-import org.kde.kirigami as Kirigami
+import CachyOS.UI
 
 Item {
     id: root
 
-    implicitWidth: Kirigami.Units.gridUnit * 19
-    implicitHeight: Kirigami.Units.gridUnit * 28
+    implicitWidth: 380
+    implicitHeight: 560
 
     ColumnLayout {
         anchors.fill: parent
-        anchors.margins: Kirigami.Units.largeSpacing
-        spacing: Kirigami.Units.mediumSpacing
+        anchors.margins: CachyTheme.marginWindow
+        spacing: CachyTheme.spacingMedium
 
         // Top Navigation Header with Centered Segmented Control & Clear Action
         RowLayout {
             Layout.fillWidth: true
-            spacing: Kirigami.Units.smallSpacing
+            spacing: CachyTheme.spacingSmall
 
             // Left: Clear history action button
-            QQC2.Button {
+            CachyButton {
                 id: clearBtn
                 text: recentsModel.onlyMissed ? i18n("Borrar perdidas") : i18n("Borrar")
-                icon.name: "edit-delete"
-                flat: true
-                Layout.preferredHeight: Kirigami.Units.gridUnit * 1.8
+                iconName: "edit-delete"
                 visible: (recentsModel.onlyMissed ? recentsModel.missedCount : recentsModel.allCount) > 0
-
-                contentItem: RowLayout {
-                    spacing: 4
-                    Kirigami.Icon {
-                        source: clearBtn.icon.name
-                        Layout.preferredWidth: 16
-                        Layout.preferredHeight: 16
-                        color: clearBtn.down ? "#CC2D25" : "#FF3B30"
-                    }
-                    Text {
-                        text: clearBtn.text
-                        font.pixelSize: 13
-                        font.weight: Font.DemiBold
-                        color: clearBtn.down ? "#CC2D25" : "#FF3B30"
-                    }
-                }
-
-                background: Rectangle {
-                    radius: 8
-                    color: clearBtn.hovered 
-                        ? (Kirigami.Theme.backgroundColor.hslLightness < 0.5 ? "#2C1B1B" : "#FEECEC") 
-                        : "transparent"
-                    Behavior on color { ColorAnimation { duration: 100 } }
-                }
-
                 onClicked: clearConfirmDialog.open()
             }
 
@@ -60,87 +33,21 @@ Item {
                 Layout.fillWidth: true
             }
 
-            // Center Segmented Capsule (Todas | Perdidas)
-            Rectangle {
+            // Center Segmented Control (Todas | Perdidas)
+            CachySegmentedControl {
+                id: segCtrl
                 Layout.alignment: Qt.AlignHCenter
-                width: Kirigami.Units.gridUnit * 11
-                height: Kirigami.Units.gridUnit * 1.8
-                radius: 8
-                color: Kirigami.Theme.backgroundColor.hslLightness < 0.5 ? "#1C1C1E" : "#E5E5EA"
+                model: [i18n("Todas"), recentsModel.missedCount > 0 ? i18n("Perdidas (%1)", recentsModel.missedCount) : i18n("Perdidas")]
+                currentIndex: recentsModel.onlyMissed ? 1 : 0
+                onCurrentIndexChanged: {
+                    recentsModel.onlyMissed = (currentIndex === 1);
+                }
+            }
 
-                RowLayout {
-                    anchors.fill: parent
-                    spacing: 0
-
-                    // Option "Todas"
-                    Rectangle {
-                        Layout.fillWidth: true
-                        Layout.fillHeight: true
-                        radius: 8
-                        color: !recentsModel.onlyMissed 
-                            ? (Kirigami.Theme.backgroundColor.hslLightness < 0.5 ? "#636366" : "#FFFFFF")
-                            : "transparent"
-
-                        Behavior on color { ColorAnimation { duration: 120 } }
-
-                        Text {
-                            anchors.centerIn: parent
-                            text: i18n("Todas")
-                            font.pixelSize: 13
-                            font.weight: !recentsModel.onlyMissed ? Font.Bold : Font.Normal
-                            color: Kirigami.Theme.textColor
-                        }
-
-                        MouseArea {
-                            anchors.fill: parent
-                            cursorShape: Qt.PointingHandCursor
-                            onClicked: recentsModel.onlyMissed = false
-                        }
-                    }
-
-                    // Option "Perdidas"
-                    Rectangle {
-                        Layout.fillWidth: true
-                        Layout.fillHeight: true
-                        radius: 8
-                        color: recentsModel.onlyMissed 
-                            ? (Kirigami.Theme.backgroundColor.hslLightness < 0.5 ? "#636366" : "#FFFFFF")
-                            : "transparent"
-
-                        Behavior on color { ColorAnimation { duration: 120 } }
-
-                        RowLayout {
-                            anchors.centerIn: parent
-                            spacing: 4
-                            Text {
-                                text: i18n("Perdidas")
-                                font.pixelSize: 13
-                                font.weight: recentsModel.onlyMissed ? Font.Bold : Font.Normal
-                                color: recentsModel.onlyMissed ? "#FF3B30" : Kirigami.Theme.textColor
-                            }
-                            // Badge with count of missed calls if > 0
-                            Rectangle {
-                                visible: recentsModel.missedCount > 0
-                                Layout.preferredWidth: 16
-                                Layout.preferredHeight: 16
-                                radius: 8
-                                color: "#FF3B30"
-                                Text {
-                                    anchors.centerIn: parent
-                                    text: recentsModel.missedCount > 99 ? "99+" : recentsModel.missedCount
-                                    font.pixelSize: 9
-                                    font.weight: Font.Bold
-                                    color: "#FFFFFF"
-                                }
-                            }
-                        }
-
-                        MouseArea {
-                            anchors.fill: parent
-                            cursorShape: Qt.PointingHandCursor
-                            onClicked: recentsModel.onlyMissed = true
-                        }
-                    }
+            Connections {
+                target: recentsModel
+                function onOnlyMissedChanged() {
+                    segCtrl.currentIndex = recentsModel.onlyMissed ? 1 : 0;
                 }
             }
 
@@ -163,22 +70,22 @@ Item {
             Layout.fillHeight: true
             clip: true
             model: recentsModel
-            spacing: Kirigami.Units.smallSpacing
+            spacing: CachyTheme.spacingSmall
 
             delegate: Rectangle {
                 id: itemCard
                 width: recentsList.width
                 height: 60
-                radius: 12
+                radius: CachyTheme.radiusMedium
 
-                // MD3 Surface styling
+                // Surface styling
                 color: itemMouse.pressed 
-                    ? (Kirigami.Theme.backgroundColor.hslLightness < 0.5 ? "#2C2C2E" : "#E5E5EA")
+                    ? (CachyTheme.isDark ? "#2C2C2E" : "#E5E5EA")
                     : (itemMouse.containsMouse 
-                        ? (Kirigami.Theme.backgroundColor.hslLightness < 0.5 ? "#28282A" : "#F2F2F5")
-                        : (Kirigami.Theme.backgroundColor.hslLightness < 0.5 ? "#1C1C1E" : "#FFFFFF"))
+                        ? (CachyTheme.isDark ? "#28282A" : "#F2F2F5")
+                        : (CachyTheme.isDark ? "#1C1C1E" : "#FFFFFF"))
 
-                border.color: Kirigami.Theme.backgroundColor.hslLightness < 0.5 ? "#2C2C2E" : "#E5E5EA"
+                border.color: CachyPalette.specularBorder
                 border.width: 1
 
                 Behavior on color { ColorAnimation { duration: 120 } }
@@ -195,18 +102,17 @@ Item {
                         Layout.preferredHeight: 38
                         radius: 19
                         color: model.type === 2 
-                            ? (Kirigami.Theme.backgroundColor.hslLightness < 0.5 ? "#361616" : "#FEECEC")
+                            ? (CachyTheme.isDark ? "#361616" : "#FEECEC")
                             : (model.type === 0 
-                                ? (Kirigami.Theme.backgroundColor.hslLightness < 0.5 ? "#182635" : "#EAF2FC")
-                                : (Kirigami.Theme.backgroundColor.hslLightness < 0.5 ? "#1A3820" : "#EAF7EE"))
+                                ? (CachyTheme.isDark ? "#182635" : "#EAF2FC")
+                                : (CachyTheme.isDark ? "#1A3820" : "#EAF7EE"))
 
-                        Kirigami.Icon {
+                        CachyIcon {
                             anchors.centerIn: parent
-                            source: model.type === 2 
+                            name: model.type === 2 
                                 ? "call-missed" 
                                 : (model.type === 0 ? "call-outgoing" : "call-incoming")
-                            width: 18
-                            height: 18
+                            size: 18
                             color: model.type === 2 
                                 ? "#FF3B30" 
                                 : (model.type === 0 ? "#007AFF" : "#34C759")
@@ -223,7 +129,7 @@ Item {
                             text: model.name
                             font.pixelSize: 15
                             font.weight: Font.DemiBold
-                            color: model.type === 2 ? "#FF3B30" : Kirigami.Theme.textColor
+                            color: model.type === 2 ? "#FF3B30" : CachyTheme.textPrimary
                             elide: Text.ElideRight
                             Layout.fillWidth: true
                         }
@@ -233,20 +139,20 @@ Item {
                             Text {
                                 text: model.formattedNumber
                                 font.pixelSize: 12
-                                color: Kirigami.Theme.disabledTextColor
+                                color: CachyTheme.textSecondary
                                 elide: Text.ElideRight
                             }
                             Text {
                                 text: "•"
                                 font.pixelSize: 10
-                                color: Kirigami.Theme.disabledTextColor
+                                color: CachyTheme.textSecondary
                             }
                             Text {
                                 text: model.type === 2 
                                     ? i18n("Perdida") 
                                     : (model.type === 0 ? i18n("Saliente") : i18n("Entrante"))
                                 font.pixelSize: 12
-                                color: model.type === 2 ? "#FF3B30" : Kirigami.Theme.disabledTextColor
+                                color: model.type === 2 ? "#FF3B30" : CachyTheme.textSecondary
                             }
                         }
                     }
@@ -259,14 +165,14 @@ Item {
                         Text {
                             text: model.formattedDate
                             font.pixelSize: 12
-                            color: Kirigami.Theme.disabledTextColor
+                            color: CachyTheme.textSecondary
                             Layout.alignment: Qt.AlignRight
                         }
 
                         Text {
                             text: model.duration
                             font.pixelSize: 11
-                            color: Kirigami.Theme.disabledTextColor
+                            color: CachyTheme.textSecondary
                             visible: model.type !== 2 && text !== "00:00"
                             Layout.alignment: Qt.AlignRight
                         }
@@ -279,21 +185,20 @@ Item {
                         Layout.preferredHeight: 32
                         radius: 16
                         color: delMouse.pressed 
-                            ? (Kirigami.Theme.backgroundColor.hslLightness < 0.5 ? "#401A1A" : "#FDD8D8")
+                            ? (CachyTheme.isDark ? "#401A1A" : "#FDD8D8")
                             : (delMouse.containsMouse 
-                                ? (Kirigami.Theme.backgroundColor.hslLightness < 0.5 ? "#2C1B1B" : "#FEECEC")
+                                ? (CachyTheme.isDark ? "#2C1B1B" : "#FEECEC")
                                 : "transparent")
 
                         opacity: itemMouse.containsMouse || delMouse.containsMouse ? 1.0 : 0.4
                         Behavior on opacity { NumberAnimation { duration: 150 } }
                         Behavior on color { ColorAnimation { duration: 100 } }
 
-                        Kirigami.Icon {
+                        CachyIcon {
                             anchors.centerIn: parent
-                            source: "edit-delete"
-                            width: 16
-                            height: 16
-                            color: delMouse.containsMouse ? "#FF3B30" : Kirigami.Theme.disabledTextColor
+                            name: "edit-delete"
+                            size: 16
+                            color: delMouse.containsMouse ? "#FF3B30" : CachyTheme.textSecondary
                         }
 
                         MouseArea {
@@ -306,10 +211,6 @@ Item {
                                 recentsModel.removeById(model.callId);
                             }
                         }
-
-                        QQC2.ToolTip.visible: delMouse.containsMouse
-                        QQC2.ToolTip.text: i18n("Eliminar esta llamada")
-                        QQC2.ToolTip.delay: 400
                     }
                 }
 
@@ -318,6 +219,7 @@ Item {
                     id: itemMouse
                     anchors.fill: parent
                     hoverEnabled: true
+                    cursorShape: Qt.PointingHandCursor
                     acceptedButtons: Qt.LeftButton | Qt.RightButton
                     z: -1
 
@@ -329,26 +231,27 @@ Item {
                         }
                     }
 
-                    QQC2.Menu {
+                    CachyMenu {
                         id: rowContextMenu
 
-                        QQC2.MenuItem {
+                        CachyMenuItem {
                             text: i18n("Llamar a %1", model.name)
-                            icon.name: "call-start"
+                            iconName: "call-start"
                             onTriggered: phoneController.startCall(model.number)
                         }
 
-                        QQC2.MenuItem {
+                        CachyMenuItem {
                             text: i18n("Copiar número")
-                            icon.name: "edit-copy"
+                            iconName: "edit-copy"
                             onTriggered: phoneController.copyToClipboard(model.number)
                         }
 
-                        QQC2.MenuSeparator {}
+                        CachyMenuSeparator {}
 
-                        QQC2.MenuItem {
+                        CachyMenuItem {
                             text: i18n("Eliminar de recientes")
-                            icon.name: "edit-delete"
+                            iconName: "edit-delete"
+                            destructive: true
                             onTriggered: recentsModel.removeById(model.callId)
                         }
                     }
@@ -357,33 +260,35 @@ Item {
         }
     }
 
-    // Official KDE HIG Empty State Placeholder
-    Kirigami.PlaceholderMessage {
+    CachyPlaceholderMessage {
         anchors.centerIn: parent
-        width: parent.width - Kirigami.Units.gridUnit * 4
+        width: parent.width - 48
         visible: recentsModel.count === 0
-        icon.name: recentsModel.onlyMissed ? "call-missed" : "chronometer"
-        text: recentsModel.onlyMissed ? i18n("Sin llamadas perdidas") : i18n("Sin llamadas recientes")
-        explanation: recentsModel.onlyMissed 
-            ? i18n("No tienes llamadas perdidas registradas")
-            : i18n("Las llamadas entrantes, salientes y perdidas aparecerán aquí")
+        iconName: recentsModel.onlyMissed ? "call-missed" : "chronometer"
+        text: recentsModel.onlyMissed ? i18n("Sin llamadas perdidas\nNo tienes llamadas perdidas registradas") : i18n("Sin llamadas recientes\nLas llamadas entrantes, salientes y perdidas aparecerán aquí")
     }
 
     // Modal Confirmation Dialog for clearing calls
-    Kirigami.PromptDialog {
+    CachyDialog {
         id: clearConfirmDialog
         title: recentsModel.onlyMissed ? i18n("Borrar llamadas perdidas") : i18n("Borrar llamadas recientes")
         subtitle: recentsModel.onlyMissed
             ? i18n("¿Estás seguro de que deseas eliminar todas las llamadas perdidas (%1)?", recentsModel.missedCount)
             : i18n("¿Estás seguro de que deseas vaciar el historial de llamadas recientes (%1)?", recentsModel.allCount)
+        preferredWidth: 360
+        showCancelButton: true
+        cancelText: i18n("Cancelar")
 
-        standardButtons: Kirigami.Dialog.Cancel
+        ColumnLayout {
+            Layout.fillWidth: true
+            spacing: CachyTheme.spacingSmall
 
-        customFooterActions: [
-            Kirigami.Action {
+            CachyButton {
+                Layout.fillWidth: true
                 text: recentsModel.onlyMissed ? i18n("Borrar perdidas") : i18n("Borrar todas")
-                icon.name: "edit-delete"
-                onTriggered: {
+                iconName: "edit-delete"
+                primary: true
+                onClicked: {
                     if (recentsModel.onlyMissed) {
                         recentsModel.clearMissed();
                     } else {
@@ -391,16 +296,18 @@ Item {
                     }
                     clearConfirmDialog.close();
                 }
-            },
-            Kirigami.Action {
-                text: i18n("Solo perdidas (%1)", recentsModel.missedCount)
-                icon.name: "call-missed"
+            }
+
+            CachyButton {
+                Layout.fillWidth: true
+                text: i18n("Solo llamadas perdidas (%1)", recentsModel.missedCount)
+                iconName: "call-missed"
                 visible: !recentsModel.onlyMissed && recentsModel.missedCount > 0
-                onTriggered: {
+                onClicked: {
                     recentsModel.clearMissed();
                     clearConfirmDialog.close();
                 }
             }
-        ]
+        }
     }
 }

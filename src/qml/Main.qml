@@ -1,7 +1,6 @@
 import QtQuick
 import QtQuick.Controls as QQC2
 import QtQuick.Layouts
-import org.kde.kirigami as Kirigami
 import CachyOS.UI
 
 CachyWindow {
@@ -69,7 +68,7 @@ CachyWindow {
             spacing: 6
 
             CachyToolbarButton {
-                text: "📱"
+                iconName: "smartphone"
                 tooltipText: i18n("Abrir iPhone / Android Mirroring (kphonemirroring)")
                 onClicked: phoneController.openPhoneMirroring()
             }
@@ -154,10 +153,9 @@ CachyWindow {
                                 anchors.centerIn: parent
                                 spacing: 2
 
-                                Kirigami.Icon {
-                                    source: modelData.icon
-                                    Layout.preferredWidth: 18
-                                    Layout.preferredHeight: 18
+                                CachyIcon {
+                                    name: modelData.icon
+                                    size: 18
                                     color: isCurrent ? CachyTheme.accentColor : CachyTheme.textSecondary
                                     Layout.alignment: Qt.AlignHCenter
                                 }

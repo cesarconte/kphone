@@ -1,11 +1,11 @@
 import QtQuick
 import QtQuick.Controls as QQC2
 import QtQuick.Layouts
-import org.kde.kirigami as Kirigami
+import CachyOS.UI
 
 Rectangle {
     id: root
-    color: Kirigami.Theme.backgroundColor.hslLightness < 0.5 ? "#1C1C1E" : "#F2F2F7"
+    color: CachyTheme.isDark ? "#1C1C1E" : "#F2F2F7"
 
     ColumnLayout {
         anchors.fill: parent
@@ -22,11 +22,10 @@ Rectangle {
             color: "#34C759"
             Layout.alignment: Qt.AlignHCenter
 
-            Kirigami.Icon {
-                source: "user-identity"
-                width: 48
-                height: 48
-                color: "white"
+            CachyIcon {
+                name: "user-identity"
+                size: 48
+                color: "#FFFFFF"
                 anchors.centerIn: parent
             }
         }
@@ -40,7 +39,7 @@ Rectangle {
                 text: phoneController.activeContactName.length > 0 ? phoneController.activeContactName : phoneController.formattedNumber
                 font.pixelSize: 22
                 font.weight: Font.Bold
-                color: Kirigami.Theme.textColor
+                color: CachyTheme.textPrimary
                 Layout.alignment: Qt.AlignHCenter
             }
 
@@ -54,7 +53,7 @@ Rectangle {
                 }
                 font.pixelSize: phoneController.callState === 3 ? 18 : 14
                 font.weight: phoneController.callState === 3 ? Font.Bold : Font.Normal
-                color: phoneController.callState === 4 ? "#FF3B30" : (phoneController.callState === 3 ? Kirigami.Theme.highlightColor : Kirigami.Theme.disabledTextColor)
+                color: phoneController.callState === 4 ? "#FF3B30" : (phoneController.callState === 3 ? CachyTheme.accentColor : CachyTheme.textSecondary)
                 Layout.alignment: Qt.AlignHCenter
             }
 
@@ -64,7 +63,7 @@ Rectangle {
                 Layout.alignment: Qt.AlignHCenter
                 Layout.preferredHeight: 28
                 radius: 14
-                color: hintMouse.pressed ? "#48484A" : (Kirigami.Theme.backgroundColor.hslLightness < 0.5 ? "#2C2C2E" : "#E5E5EA")
+                color: hintMouse.pressed ? "#48484A" : (CachyTheme.isDark ? "#2C2C2E" : "#E5E5EA")
                 Layout.preferredWidth: hintLayout.implicitWidth + 24
 
                 RowLayout {
@@ -81,7 +80,7 @@ Rectangle {
                             ? i18n("Inicia la llamada en tu %1", phoneController.connectedDeviceName) 
                             : i18n("Pulsa para activar contador")
                         font.pixelSize: 11
-                        color: Kirigami.Theme.textColor
+                        color: CachyTheme.textPrimary
                     }
                 }
 
@@ -107,16 +106,16 @@ Rectangle {
                 spacing: 4
                 Rectangle {
                     width: 60; height: 60; radius: 30
-                    color: phoneController.isMuted ? "white" : (Kirigami.Theme.backgroundColor.hslLightness < 0.5 ? "#2C2C2E" : "#E5E5EA")
-                    Kirigami.Icon {
-                        source: phoneController.isMuted ? "audio-volume-muted" : "audio-input-microphone"
-                        width: 26; height: 26
-                        color: phoneController.isMuted ? "black" : Kirigami.Theme.textColor
+                    color: phoneController.isMuted ? "white" : (CachyTheme.isDark ? "#2C2C2E" : "#E5E5EA")
+                    CachyIcon {
+                        name: phoneController.isMuted ? "audio-volume-muted" : "audio-input-microphone"
+                        size: 26
+                        color: phoneController.isMuted ? "black" : CachyTheme.textPrimary
                         anchors.centerIn: parent
                     }
                     MouseArea { anchors.fill: parent; onClicked: phoneController.toggleMute() }
                 }
-                Text { text: i18n("Silenciar"); font.pixelSize: 11; color: Kirigami.Theme.textColor; Layout.alignment: Qt.AlignHCenter }
+                Text { text: i18n("Silenciar"); font.pixelSize: 11; color: CachyTheme.textPrimary; Layout.alignment: Qt.AlignHCenter }
             }
 
             // 2. Teclado DTMF
@@ -124,11 +123,11 @@ Rectangle {
                 spacing: 4
                 Rectangle {
                     width: 60; height: 60; radius: 30
-                    color: Kirigami.Theme.backgroundColor.hslLightness < 0.5 ? "#2C2C2E" : "#E5E5EA"
-                    Kirigami.Icon {
-                        source: "input-dialpad"
-                        width: 26; height: 26
-                        color: Kirigami.Theme.textColor
+                    color: CachyTheme.isDark ? "#2C2C2E" : "#E5E5EA"
+                    CachyIcon {
+                        name: "input-dialpad"
+                        size: 26
+                        color: CachyTheme.textPrimary
                         anchors.centerIn: parent
                     }
                     MouseArea { 
@@ -136,7 +135,7 @@ Rectangle {
                         onClicked: mainTabBar.currentIndex = 3 // Switch to Keypad tab
                     }
                 }
-                Text { text: i18n("Teclado"); font.pixelSize: 11; color: Kirigami.Theme.textColor; Layout.alignment: Qt.AlignHCenter }
+                Text { text: i18n("Teclado"); font.pixelSize: 11; color: CachyTheme.textPrimary; Layout.alignment: Qt.AlignHCenter }
             }
 
             // 3. Altavoz
@@ -144,16 +143,16 @@ Rectangle {
                 spacing: 4
                 Rectangle {
                     width: 60; height: 60; radius: 30
-                    color: phoneController.isSpeakerOn ? "white" : (Kirigami.Theme.backgroundColor.hslLightness < 0.5 ? "#2C2C2E" : "#E5E5EA")
-                    Kirigami.Icon {
-                        source: "audio-speakers"
-                        width: 26; height: 26
-                        color: phoneController.isSpeakerOn ? "black" : Kirigami.Theme.textColor
+                    color: phoneController.isSpeakerOn ? "white" : (CachyTheme.isDark ? "#2C2C2E" : "#E5E5EA")
+                    CachyIcon {
+                        name: "audio-speakers"
+                        size: 26
+                        color: phoneController.isSpeakerOn ? "black" : CachyTheme.textPrimary
                         anchors.centerIn: parent
                     }
                     MouseArea { anchors.fill: parent; onClicked: phoneController.toggleSpeaker() }
                 }
-                Text { text: i18n("Altavoz"); font.pixelSize: 11; color: Kirigami.Theme.textColor; Layout.alignment: Qt.AlignHCenter }
+                Text { text: i18n("Altavoz"); font.pixelSize: 11; color: CachyTheme.textPrimary; Layout.alignment: Qt.AlignHCenter }
             }
 
             // 4. Phone Mirroring Shortcut
@@ -162,9 +161,9 @@ Rectangle {
                 Rectangle {
                     width: 60; height: 60; radius: 30
                     color: "#5856D6"
-                    Kirigami.Icon {
-                        source: "kphonemirroring"
-                        width: 26; height: 26
+                    CachyIcon {
+                        name: "smartphone"
+                        size: 26
                         color: "white"
                         anchors.centerIn: parent
                     }
@@ -173,7 +172,7 @@ Rectangle {
                         onClicked: phoneController.openPhoneMirroring()
                     }
                 }
-                Text { text: i18n("Pantalla"); font.pixelSize: 11; color: Kirigami.Theme.textColor; Layout.alignment: Qt.AlignHCenter }
+                Text { text: i18n("Pantalla"); font.pixelSize: 11; color: CachyTheme.textPrimary; Layout.alignment: Qt.AlignHCenter }
             }
 
             // 5. Mensaje rápido
@@ -181,11 +180,11 @@ Rectangle {
                 spacing: 4
                 Rectangle {
                     width: 60; height: 60; radius: 30
-                    color: Kirigami.Theme.backgroundColor.hslLightness < 0.5 ? "#2C2C2E" : "#E5E5EA"
-                    Kirigami.Icon {
-                        source: "message-new"
-                        width: 24; height: 24
-                        color: Kirigami.Theme.textColor
+                    color: CachyTheme.isDark ? "#2C2C2E" : "#E5E5EA"
+                    CachyIcon {
+                        name: "message-new"
+                        size: 24
+                        color: CachyTheme.textPrimary
                         anchors.centerIn: parent
                     }
                     MouseArea { 
@@ -193,7 +192,7 @@ Rectangle {
                         onClicked: phoneController.openSms(phoneController.dialedNumber)
                     }
                 }
-                Text { text: i18n("Mensaje"); font.pixelSize: 11; color: Kirigami.Theme.textColor; Layout.alignment: Qt.AlignHCenter }
+                Text { text: i18n("Mensaje"); font.pixelSize: 11; color: CachyTheme.textPrimary; Layout.alignment: Qt.AlignHCenter }
             }
 
             // 6. Contactos
@@ -201,11 +200,11 @@ Rectangle {
                 spacing: 4
                 Rectangle {
                     width: 60; height: 60; radius: 30
-                    color: Kirigami.Theme.backgroundColor.hslLightness < 0.5 ? "#2C2C2E" : "#E5E5EA"
-                    Kirigami.Icon {
-                        source: "contact-new"
-                        width: 24; height: 24
-                        color: Kirigami.Theme.textColor
+                    color: CachyTheme.isDark ? "#2C2C2E" : "#E5E5EA"
+                    CachyIcon {
+                        name: "contact-new"
+                        size: 24
+                        color: CachyTheme.textPrimary
                         anchors.centerIn: parent
                     }
                     MouseArea { 
@@ -213,7 +212,7 @@ Rectangle {
                         onClicked: mainTabBar.currentIndex = 2 // Switch to Contacts tab
                     }
                 }
-                Text { text: i18n("Contactos"); font.pixelSize: 11; color: Kirigami.Theme.textColor; Layout.alignment: Qt.AlignHCenter }
+                Text { text: i18n("Contactos"); font.pixelSize: 11; color: CachyTheme.textPrimary; Layout.alignment: Qt.AlignHCenter }
             }
         }
 
@@ -228,12 +227,10 @@ Rectangle {
             Layout.alignment: Qt.AlignHCenter
             Layout.bottomMargin: 16
 
-            Kirigami.Icon {
-                source: "call-start"
-                width: 32
-                height: 32
+            CachyIcon {
+                name: "call-start"
+                size: 32
                 color: "#FFFFFF"
-                isMask: true
                 rotation: 135
                 anchors.centerIn: parent
             }

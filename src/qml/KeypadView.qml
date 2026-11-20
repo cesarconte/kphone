@@ -1,13 +1,13 @@
 import QtQuick
 import QtQuick.Controls as QQC2
 import QtQuick.Layouts
-import org.kde.kirigami as Kirigami
+import CachyOS.UI
 
 Item {
     id: root
 
-    implicitWidth: Kirigami.Units.gridUnit * 19
-    implicitHeight: mainCol.implicitHeight + Kirigami.Units.largeSpacing * 2
+    implicitWidth: 340
+    implicitHeight: mainCol.implicitHeight + CachyTheme.spacingLarge * 2
 
     // Responsive button dimension adapting to window height
     readonly property real buttonSize: Math.max(54, Math.min(68, Math.floor((root.height - 200) / 4.6)))
@@ -23,7 +23,7 @@ Item {
             id: mainCol
             width: parent.width
             anchors.centerIn: parent
-            spacing: Kirigami.Units.smallSpacing
+            spacing: CachyTheme.spacingSmall
 
             // Top display area
             Item {
@@ -39,7 +39,7 @@ Item {
                         text: phoneController.activeContactName
                         font.pixelSize: 14
                         font.weight: Font.DemiBold
-                        color: Kirigami.Theme.highlightColor
+                        color: CachyTheme.accentColor
                         visible: text.length > 0
                         Layout.alignment: Qt.AlignHCenter
                     }
@@ -49,7 +49,7 @@ Item {
                         text: phoneController.formattedNumber.length > 0 ? phoneController.formattedNumber : ""
                         font.pixelSize: phoneController.formattedNumber.length > 12 ? 22 : 30
                         font.weight: Font.Medium
-                        color: Kirigami.Theme.textColor
+                        color: CachyTheme.textPrimary
                         Layout.alignment: Qt.AlignHCenter
                     }
                 }
@@ -60,8 +60,8 @@ Item {
                 id: keypadGrid
                 columns: 3
                 Layout.alignment: Qt.AlignHCenter
-                columnSpacing: Math.max(16, Kirigami.Units.largeSpacing * 1.5)
-                rowSpacing: Math.max(8, Kirigami.Units.smallSpacing * 1.5)
+                columnSpacing: Math.max(16, CachyTheme.spacingLarge * 1.5)
+                rowSpacing: Math.max(8, CachyTheme.spacingSmall * 1.5)
 
                 Repeater {
                     model: [
@@ -85,8 +85,8 @@ Item {
                         height: root.buttonSize
                         radius: root.buttonSize / 2
                         color: mouseArea.pressed 
-                            ? (Kirigami.Theme.backgroundColor.hslLightness < 0.5 ? "#48484A" : "#D1D1D6")
-                            : (Kirigami.Theme.backgroundColor.hslLightness < 0.5 ? "#2C2C2E" : "#E5E5EA")
+                            ? (CachyTheme.isDark ? "#48484A" : "#D1D1D6")
+                            : (CachyTheme.isDark ? "#2C2C2E" : "#E5E5EA")
 
                         Behavior on color { ColorAnimation { duration: 100 } }
 
@@ -98,7 +98,7 @@ Item {
                                 text: modelData.num
                                 font.pixelSize: modelData.num === "*" || modelData.num === "#" ? 28 : (root.buttonSize < 60 ? 22 : 26)
                                 font.weight: Font.Normal
-                                color: Kirigami.Theme.textColor
+                                color: CachyTheme.textPrimary
                                 Layout.alignment: Qt.AlignHCenter
                             }
 
@@ -106,7 +106,7 @@ Item {
                                 text: modelData.sub
                                 font.pixelSize: 8
                                 font.weight: Font.Bold
-                                color: Kirigami.Theme.disabledTextColor
+                                color: CachyTheme.textSecondary
                                 visible: modelData.sub.length > 0 && root.buttonSize >= 56
                                 Layout.alignment: Qt.AlignHCenter
                             }
@@ -132,8 +132,8 @@ Item {
             // Bottom Actions: Call & Backspace
             Item {
                 Layout.fillWidth: true
-                Layout.preferredHeight: root.buttonSize + Kirigami.Units.smallSpacing
-                Layout.topMargin: Kirigami.Units.smallSpacing
+                Layout.preferredHeight: root.buttonSize + CachyTheme.spacingSmall
+                Layout.topMargin: CachyTheme.spacingSmall
 
                 // Green Call Button (Centered)
                 Rectangle {
@@ -146,11 +146,10 @@ Item {
 
                     Behavior on color { ColorAnimation { duration: 100 } }
 
-                    Kirigami.Icon {
-                        source: "call-start"
-                        width: root.buttonSize * 0.44
-                        height: root.buttonSize * 0.44
-                        color: "white"
+                    CachyIcon {
+                        name: "call-start"
+                        size: Math.round(root.buttonSize * 0.44)
+                        color: "#FFFFFF"
                         anchors.centerIn: parent
                     }
 
@@ -170,15 +169,14 @@ Item {
                     radius: width / 2
                     color: "transparent"
                     anchors.left: callBtn.right
-                    anchors.leftMargin: Kirigami.Units.largeSpacing
+                    anchors.leftMargin: CachyTheme.spacingLarge
                     anchors.verticalCenter: callBtn.verticalCenter
                     visible: phoneController.dialedNumber.length > 0
 
-                    Kirigami.Icon {
-                        source: "edit-clear-locationbar-rtl"
-                        width: 22
-                        height: 22
-                        color: Kirigami.Theme.textColor
+                    CachyIcon {
+                        name: "edit-clear-locationbar-rtl"
+                        size: 22
+                        color: CachyTheme.textPrimary
                         anchors.centerIn: parent
                     }
 
