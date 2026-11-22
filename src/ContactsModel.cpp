@@ -152,8 +152,7 @@ void ContactsModel::loadFromVcards()
 {
     m_allContacts.clear();
 
-    const QString homePath = QDir::homePath();
-    const QString kpeoplePath = homePath + QStringLiteral("/.local/share/kpeoplevcard");
+    const QString kpeoplePath = QStandardPaths::writableLocation(QStandardPaths::GenericDataLocation) + QStringLiteral("/kpeoplevcard");
 
     QDir dir(kpeoplePath);
     if (dir.exists()) {

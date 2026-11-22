@@ -1,3 +1,11 @@
+/*
+ * SPDX-FileCopyrightText: 2026 Cesar
+ * SPDX-FileCopyrightText: 2026 CachyOS UI contributors
+ * SPDX-License-Identifier: GPL-3.0-or-later
+ */
+
+pragma ComponentBehavior: Bound
+
 import QtQuick
 import QtQuick.Controls as QQC2
 import QtQuick.Layouts
@@ -13,7 +21,7 @@ Item {
         anchors.margins: CachyTheme.marginWindow
         spacing: CachyTheme.spacingMedium
 
-        // Search Bar
+        // Search Bar (Golden Gate Capsule)
         CachySearchField {
             id: searchField
             Layout.fillWidth: true
@@ -32,15 +40,16 @@ Item {
 
             delegate: Rectangle {
                 id: contactCard
+                required property var model
                 width: contactsList.width
                 height: 64
                 radius: CachyTheme.radiusMedium
 
-                color: itemMouse.pressed 
-                    ? (CachyTheme.isDark ? "#2C2C2E" : "#E5E5EA")
-                    : (itemMouse.containsMouse 
-                        ? (CachyTheme.isDark ? "#28282A" : "#F2F2F5") 
-                        : (CachyTheme.isDark ? "#1C1C1E" : "#FFFFFF"))
+                color: itemTap.pressed
+                    ? CachyPalette.pressedOverlay
+                    : (itemHover.hovered
+                        ? CachyPalette.cardBackgroundHover
+                        : CachyPalette.cardBackground)
 
                 border.color: CachyPalette.specularBorder
                 border.width: 1
@@ -58,11 +67,11 @@ Item {
                         Layout.preferredWidth: 44
                         Layout.preferredHeight: 44
                         radius: 22
-                        color: model.avatarColor
+                        color: contactCard.model.avatarColor
 
                         Text {
                             anchors.centerIn: parent
-                            text: model.initials
+                            text: contactCard.model.initials
                             font.pixelSize: 16
                             font.weight: Font.Bold
                             color: "#FFFFFF"
@@ -76,18 +85,18 @@ Item {
                         spacing: 2
 
                         Text {
-                            text: model.name
+                            text: contactCard.model.name
                             font.pixelSize: 15
                             font.weight: Font.DemiBold
-                            color: CachyTheme.textPrimary
+                            color: CachyPalette.text
                             elide: Text.ElideRight
                             Layout.fillWidth: true
                         }
 
                         Text {
-                            text: model.formattedNumber.length > 0 ? model.formattedNumber : model.email
+                            text: contactCard.model.formattedNumber.length > 0 ? contactCard.model.formattedNumber : contactCard.model.email
                             font.pixelSize: 13
-                            color: CachyTheme.textSecondary
+                            color: CachyPalette.textSecondary
                             elide: Text.ElideRight
                             Layout.fillWidth: true
                         }
@@ -98,54 +107,67 @@ Item {
                         name: "starred-symbolic"
                         size: 16
                         color: "#FF9500"
-                        visible: model.isFavorite
+                        visible: contactCard.model.isFavorite
                     }
 
                     // 3. Quick call button (40x40 tonal container)
                     Rectangle {
+                        id: quickCallBtn
                         Layout.preferredWidth: 40
                         Layout.preferredHeight: 40
                         radius: 20
-                        color: callMouse.pressed
+                        color: callTap.pressed
                             ? "#2DB84D"
-                            : (callMouse.containsMouse
-                                ? (CachyTheme.isDark ? "#224A2A" : "#DDF3E4")
-                                : (CachyTheme.isDark ? "#1A3820" : "#EAF7EE"))
+                            : (callHover.hovered
+                                ? (CachyPalette.isDark ? "#224A2A" : "#DDF3E4")
+                                : (CachyPalette.isDark ? "#1A3820" : "#EAF7EE"))
 
                         Behavior on color { ColorAnimation { duration: 120 } }
+
+                        scale: callTap.pressed ? 0.94 : (callHover.hovered ? 1.05 : 1.0)
+                        Behavior on scale {
+                            NumberAnimation { duration: CachyTheme.animFast; easing.type: Easing.OutBack }
+                        }
 
                         CachyIcon {
                             name: "call-start"
                             size: 20
-                            color: callMouse.pressed ? "#FFFFFF" : "#34C759"
+                            color: callTap.pressed ? "#FFFFFF" : "#34C759"
                             anchors.centerIn: parent
                         }
 
-                        MouseArea {
-                            id: callMouse
-                            anchors.fill: parent
-                            hoverEnabled: true
+                        HoverHandler {
+                            id: callHover
                             cursorShape: Qt.PointingHandCursor
-                            onClicked: phoneController.startCall(model.number)
                         }
+                        TapHandler {
+                            id: callTap
+                            onTapped: phoneController.startCall(contactCard.model.number)
+                        }
+
+                        QQC2.ToolTip.visible: callHover.hovered
+                        QQC2.ToolTip.text: i18n("Llamar")
+                        QQC2.ToolTip.delay: 450
                     }
                 }
 
-                MouseArea {
-                    id: itemMouse
-                    anchors.fill: parent
-                    hoverEnabled: true
+                HoverHandler {
+                    id: itemHover
                     cursorShape: Qt.PointingHandCursor
-                    onClicked: {
+                }
+
+                TapHandler {
+                    id: itemTap
+                    onTapped: {
                         root.selectedContact = {
-                            id: model.id,
-                            name: model.name,
-                            number: model.number,
-                            formattedNumber: model.formattedNumber,
-                            email: model.email,
-                            initials: model.initials,
-                            avatarColor: model.avatarColor,
-                            isFavorite: model.isFavorite
+                            id: contactCard.model.id,
+                            name: contactCard.model.name,
+                            number: contactCard.model.number,
+                            formattedNumber: contactCard.model.formattedNumber,
+                            email: contactCard.model.email,
+                            initials: contactCard.model.initials,
+                            avatarColor: contactCard.model.avatarColor,
+                            isFavorite: contactCard.model.isFavorite
                         };
                         contactDialog.open();
                     }
@@ -162,7 +184,7 @@ Item {
         text: searchField.text.length > 0 ? i18n("No se encontraron contactos para \"%1\"", searchField.text) : i18n("Sin contactos")
     }
 
-    // Contact Details Modal Dialog
+    // Contact Details Modal Dialog (macOS Golden Gate styled)
     CachyDialog {
         id: contactDialog
         title: ""
@@ -196,13 +218,13 @@ Item {
                 text: root.selectedContact ? root.selectedContact.name : ""
                 font.pixelSize: 18
                 font.weight: Font.Bold
-                color: CachyTheme.textPrimary
+                color: CachyPalette.text
                 Layout.alignment: Qt.AlignHCenter
                 horizontalAlignment: Text.AlignHCenter
                 Layout.fillWidth: true
             }
 
-            // Action Quick Buttons Row
+            // Action Quick Buttons Row (macOS Golden Gate circular action cluster)
             RowLayout {
                 Layout.alignment: Qt.AlignHCenter
                 spacing: 16
@@ -214,23 +236,29 @@ Item {
                         Layout.preferredWidth: 44
                         Layout.preferredHeight: 44
                         radius: 22
-                        color: "#34C759"
+                        color: callBtnTap.pressed ? "#2DB84D" : "#34C759"
+                        border.width: 1
+                        border.color: CachyPalette.specularBorder
+
                         CachyIcon {
                             name: "call-start"
                             size: 22
                             color: "white"
                             anchors.centerIn: parent
                         }
-                        MouseArea {
-                            anchors.fill: parent
-                            cursorShape: Qt.PointingHandCursor
-                            onClicked: {
+                        HoverHandler { id: callBtnHover; cursorShape: Qt.PointingHandCursor }
+                        TapHandler {
+                            id: callBtnTap
+                            onTapped: {
                                 contactDialog.close();
                                 phoneController.startCall(root.selectedContact.number);
                             }
                         }
+                        QQC2.ToolTip.visible: callBtnHover.hovered
+                        QQC2.ToolTip.text: i18n("Iniciar llamada")
+                        QQC2.ToolTip.delay: 450
                     }
-                    Text { text: i18n("Llamar"); font.pixelSize: 11; color: CachyTheme.textPrimary; Layout.alignment: Qt.AlignHCenter }
+                    Text { text: i18n("Llamar"); font.pixelSize: 11; color: CachyPalette.text; Layout.alignment: Qt.AlignHCenter }
                 }
 
                 // Mensaje (SMS)
@@ -240,22 +268,28 @@ Item {
                         Layout.preferredWidth: 44
                         Layout.preferredHeight: 44
                         radius: 22
-                        color: "#007AFF"
+                        color: msgBtnTap.pressed ? "#0062CC" : "#007AFF"
+                        border.width: 1
+                        border.color: CachyPalette.specularBorder
+
                         CachyIcon {
                             name: "message-new"
                             size: 20
                             color: "white"
                             anchors.centerIn: parent
                         }
-                        MouseArea {
-                            anchors.fill: parent
-                            cursorShape: Qt.PointingHandCursor
-                            onClicked: {
+                        HoverHandler { id: msgBtnHover; cursorShape: Qt.PointingHandCursor }
+                        TapHandler {
+                            id: msgBtnTap
+                            onTapped: {
                                 phoneController.openSms(root.selectedContact.number);
                             }
                         }
+                        QQC2.ToolTip.visible: msgBtnHover.hovered
+                        QQC2.ToolTip.text: i18n("Enviar mensaje")
+                        QQC2.ToolTip.delay: 450
                     }
-                    Text { text: i18n("Mensaje"); font.pixelSize: 11; color: CachyTheme.textPrimary; Layout.alignment: Qt.AlignHCenter }
+                    Text { text: i18n("Mensaje"); font.pixelSize: 11; color: CachyPalette.text; Layout.alignment: Qt.AlignHCenter }
                 }
 
                 // Duplicación (Mirroring)
@@ -265,22 +299,28 @@ Item {
                         Layout.preferredWidth: 44
                         Layout.preferredHeight: 44
                         radius: 22
-                        color: "#5856D6"
+                        color: mirrorBtnTap.pressed ? "#4745B8" : "#5856D6"
+                        border.width: 1
+                        border.color: CachyPalette.specularBorder
+
                         CachyIcon {
                             name: "smartphone"
                             size: 22
                             color: "white"
                             anchors.centerIn: parent
                         }
-                        MouseArea {
-                            anchors.fill: parent
-                            cursorShape: Qt.PointingHandCursor
-                            onClicked: {
+                        HoverHandler { id: mirrorBtnHover; cursorShape: Qt.PointingHandCursor }
+                        TapHandler {
+                            id: mirrorBtnTap
+                            onTapped: {
                                 phoneController.openPhoneMirroring();
                             }
                         }
+                        QQC2.ToolTip.visible: mirrorBtnHover.hovered
+                        QQC2.ToolTip.text: i18n("Duplicar pantalla")
+                        QQC2.ToolTip.delay: 450
                     }
-                    Text { text: i18n("Pantalla"); font.pixelSize: 11; color: CachyTheme.textPrimary; Layout.alignment: Qt.AlignHCenter }
+                    Text { text: i18n("Pantalla"); font.pixelSize: 11; color: CachyPalette.text; Layout.alignment: Qt.AlignHCenter }
                 }
 
                 // Favorito
@@ -290,25 +330,31 @@ Item {
                         Layout.preferredWidth: 44
                         Layout.preferredHeight: 44
                         radius: 22
-                        color: root.selectedContact && root.selectedContact.isFavorite ? "#FF9500" : (CachyTheme.isDark ? "#3A3A3C" : "#E5E5EA")
+                        color: root.selectedContact && root.selectedContact.isFavorite ? "#FF9500" : (CachyPalette.isDark ? "#3A3A3C" : "#E5E5EA")
+                        border.width: 1
+                        border.color: CachyPalette.specularBorder
+
                         CachyIcon {
                             name: "starred-symbolic"
                             size: 20
-                            color: root.selectedContact && root.selectedContact.isFavorite ? "white" : CachyTheme.textPrimary
+                            color: root.selectedContact && root.selectedContact.isFavorite ? "white" : CachyPalette.text
                             anchors.centerIn: parent
                         }
-                        MouseArea {
-                            anchors.fill: parent
-                            cursorShape: Qt.PointingHandCursor
-                            onClicked: {
+                        HoverHandler { id: favBtnHover; cursorShape: Qt.PointingHandCursor }
+                        TapHandler {
+                            id: favBtnTap
+                            onTapped: {
                                 if (root.selectedContact) {
                                     contactsModel.toggleFavorite(root.selectedContact.id);
                                     root.selectedContact.isFavorite = !root.selectedContact.isFavorite;
                                 }
                             }
                         }
+                        QQC2.ToolTip.visible: favBtnHover.hovered
+                        QQC2.ToolTip.text: root.selectedContact && root.selectedContact.isFavorite ? i18n("Quitar de favoritos") : i18n("Añadir a favoritos")
+                        QQC2.ToolTip.delay: 450
                     }
-                    Text { text: i18n("Favorito"); font.pixelSize: 11; color: CachyTheme.textPrimary; Layout.alignment: Qt.AlignHCenter }
+                    Text { text: i18n("Favorito"); font.pixelSize: 11; color: CachyPalette.text; Layout.alignment: Qt.AlignHCenter }
                 }
             }
 
@@ -317,7 +363,9 @@ Item {
                 Layout.fillWidth: true
                 height: 70
                 radius: CachyTheme.radiusMedium
-                color: CachyTheme.isDark ? "#2C2C2E" : "#F2F2F7"
+                color: CachyPalette.cardBackground
+                border.width: 1
+                border.color: CachyPalette.specularBorder
 
                 ColumnLayout {
                     anchors.fill: parent
@@ -327,7 +375,7 @@ Item {
                     Text {
                         text: i18n("Teléfono móvil")
                         font.pixelSize: 11
-                        color: CachyTheme.textSecondary
+                        color: CachyPalette.textSecondary
                     }
 
                     Text {

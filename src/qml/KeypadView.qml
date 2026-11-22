@@ -1,3 +1,11 @@
+/*
+ * SPDX-FileCopyrightText: 2026 Cesar
+ * SPDX-FileCopyrightText: 2026 CachyOS UI contributors
+ * SPDX-License-Identifier: GPL-3.0-or-later
+ */
+
+pragma ComponentBehavior: Bound
+
 import QtQuick
 import QtQuick.Controls as QQC2
 import QtQuick.Layouts
@@ -49,7 +57,7 @@ Item {
                         text: phoneController.formattedNumber.length > 0 ? phoneController.formattedNumber : ""
                         font.pixelSize: phoneController.formattedNumber.length > 12 ? 22 : 30
                         font.weight: Font.Medium
-                        color: CachyTheme.textPrimary
+                        color: CachyPalette.text
                         Layout.alignment: Qt.AlignHCenter
                     }
                 }
@@ -81,45 +89,59 @@ Item {
 
                     delegate: Rectangle {
                         id: btnRect
+                        required property var modelData
                         width: root.buttonSize
                         height: root.buttonSize
                         radius: root.buttonSize / 2
-                        color: mouseArea.pressed 
-                            ? (CachyTheme.isDark ? "#48484A" : "#D1D1D6")
-                            : (CachyTheme.isDark ? "#2C2C2E" : "#E5E5EA")
+                        color: btnTap.pressed
+                            ? (CachyPalette.isDark ? "#48484A" : "#D1D1D6")
+                            : (btnHover.hovered
+                                ? (CachyPalette.isDark ? "#3A3A3C" : "#DCDCE0")
+                                : (CachyPalette.isDark ? "#2C2C2E" : "#E5E5EA"))
+                        border.width: 1
+                        border.color: CachyPalette.specularBorder
 
                         Behavior on color { ColorAnimation { duration: 100 } }
+
+                        scale: btnTap.pressed ? 0.94 : (btnHover.hovered ? 1.04 : 1.0)
+                        Behavior on scale {
+                            NumberAnimation { duration: CachyTheme.animFast; easing.type: Easing.OutBack }
+                        }
 
                         ColumnLayout {
                             anchors.centerIn: parent
                             spacing: 0
 
                             Text {
-                                text: modelData.num
-                                font.pixelSize: modelData.num === "*" || modelData.num === "#" ? 28 : (root.buttonSize < 60 ? 22 : 26)
+                                text: btnRect.modelData.num
+                                font.pixelSize: btnRect.modelData.num === "*" || btnRect.modelData.num === "#" ? 28 : (root.buttonSize < 60 ? 22 : 26)
                                 font.weight: Font.Normal
-                                color: CachyTheme.textPrimary
+                                color: CachyPalette.text
                                 Layout.alignment: Qt.AlignHCenter
                             }
 
                             Text {
-                                text: modelData.sub
+                                text: btnRect.modelData.sub
                                 font.pixelSize: 8
                                 font.weight: Font.Bold
-                                color: CachyTheme.textSecondary
-                                visible: modelData.sub.length > 0 && root.buttonSize >= 56
+                                color: CachyPalette.textSecondary
+                                visible: btnRect.modelData.sub.length > 0 && root.buttonSize >= 56
                                 Layout.alignment: Qt.AlignHCenter
                             }
                         }
 
-                        MouseArea {
-                            id: mouseArea
-                            anchors.fill: parent
-                            onClicked: {
-                                phoneController.appendDigit(modelData.num);
+                        HoverHandler {
+                            id: btnHover
+                            cursorShape: Qt.PointingHandCursor
+                        }
+
+                        TapHandler {
+                            id: btnTap
+                            onTapped: {
+                                phoneController.appendDigit(btnRect.modelData.num);
                             }
-                            onPressAndHold: {
-                                if (modelData.num === "0") {
+                            onLongPressed: {
+                                if (btnRect.modelData.num === "0") {
                                     phoneController.deleteDigit();
                                     phoneController.appendDigit("+");
                                 }
@@ -141,10 +163,17 @@ Item {
                     width: root.buttonSize
                     height: root.buttonSize
                     radius: root.buttonSize / 2
-                    color: callMouse.pressed ? "#2DB84D" : "#34C759"
+                    color: callTap.pressed ? "#2DB84D" : "#34C759"
+                    border.width: 1
+                    border.color: CachyPalette.specularBorder
                     anchors.centerIn: parent
 
                     Behavior on color { ColorAnimation { duration: 100 } }
+
+                    scale: callTap.pressed ? 0.94 : (callHover.hovered ? 1.04 : 1.0)
+                    Behavior on scale {
+                        NumberAnimation { duration: CachyTheme.animFast; easing.type: Easing.OutBack }
+                    }
 
                     CachyIcon {
                         name: "call-start"
@@ -153,38 +182,58 @@ Item {
                         anchors.centerIn: parent
                     }
 
-                    MouseArea {
-                        id: callMouse
-                        anchors.fill: parent
-                        onClicked: {
-                            phoneController.startCall();
-                        }
+                    HoverHandler {
+                        id: callHover
+                        cursorShape: Qt.PointingHandCursor
                     }
+
+                    TapHandler {
+                        id: callTap
+                        onTapped: phoneController.startCall()
+                    }
+
+                    QQC2.ToolTip.visible: callHover.hovered
+                    QQC2.ToolTip.text: i18n("Llamar")
+                    QQC2.ToolTip.delay: 450
                 }
 
                 // Backspace Button (Right aligned)
                 Rectangle {
+                    id: backspaceBtn
                     width: root.buttonSize * 0.65
                     height: root.buttonSize * 0.65
                     radius: width / 2
-                    color: "transparent"
+                    color: backTap.pressed
+                        ? CachyPalette.pressedOverlay
+                        : (backHover.hovered ? CachyPalette.cardBackgroundHover : "transparent")
                     anchors.left: callBtn.right
                     anchors.leftMargin: CachyTheme.spacingLarge
                     anchors.verticalCenter: callBtn.verticalCenter
                     visible: phoneController.dialedNumber.length > 0
 
+                    Behavior on color { ColorAnimation { duration: 100 } }
+
                     CachyIcon {
                         name: "edit-clear-locationbar-rtl"
-                        size: 22
-                        color: CachyTheme.textPrimary
+                        size: 20
+                        color: CachyPalette.text
                         anchors.centerIn: parent
                     }
 
-                    MouseArea {
-                        anchors.fill: parent
-                        onClicked: phoneController.deleteDigit()
-                        onPressAndHold: phoneController.clearNumber()
+                    HoverHandler {
+                        id: backHover
+                        cursorShape: Qt.PointingHandCursor
                     }
+
+                    TapHandler {
+                        id: backTap
+                        onTapped: phoneController.deleteDigit()
+                        onLongPressed: phoneController.clearNumber()
+                    }
+
+                    QQC2.ToolTip.visible: backHover.hovered
+                    QQC2.ToolTip.text: i18n("Borrar")
+                    QQC2.ToolTip.delay: 450
                 }
             }
         }

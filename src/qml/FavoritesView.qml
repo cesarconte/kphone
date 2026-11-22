@@ -1,3 +1,11 @@
+/*
+ * SPDX-FileCopyrightText: 2026 Cesar
+ * SPDX-FileCopyrightText: 2026 CachyOS UI contributors
+ * SPDX-License-Identifier: GPL-3.0-or-later
+ */
+
+pragma ComponentBehavior: Bound
+
 import QtQuick
 import QtQuick.Controls as QQC2
 import QtQuick.Layouts
@@ -16,7 +24,7 @@ Item {
             text: i18n("Favoritos")
             font.pixelSize: 22
             font.weight: Font.Bold
-            color: CachyTheme.textPrimary
+            color: CachyPalette.text
             Layout.leftMargin: 4
             Layout.topMargin: 2
         }
@@ -32,16 +40,17 @@ Item {
 
             delegate: Rectangle {
                 id: itemCard
+                required property var model
                 width: favList.width
                 height: 64
                 radius: CachyTheme.radiusMedium
 
                 // Surface color following macOS Golden Gate
-                color: itemMouse.pressed 
-                    ? (CachyTheme.isDark ? "#2C2C2E" : "#E5E5EA")
-                    : (itemMouse.containsMouse 
-                        ? (CachyTheme.isDark ? "#28282A" : "#F2F2F5")
-                        : (CachyTheme.isDark ? "#1C1C1E" : "#FFFFFF"))
+                color: itemTap.pressed
+                    ? CachyPalette.pressedOverlay
+                    : (itemHover.hovered
+                        ? CachyPalette.cardBackgroundHover
+                        : CachyPalette.cardBackground)
 
                 border.color: CachyPalette.specularBorder
                 border.width: 1
@@ -59,11 +68,11 @@ Item {
                         Layout.preferredWidth: 44
                         Layout.preferredHeight: 44
                         radius: 22
-                        color: model.avatarColor
+                        color: itemCard.model.avatarColor
 
                         Text {
                             anchors.centerIn: parent
-                            text: model.initials
+                            text: itemCard.model.initials
                             font.pixelSize: 16
                             font.weight: Font.Bold
                             color: "#FFFFFF"
@@ -77,18 +86,18 @@ Item {
                         spacing: 2
 
                         Text {
-                            text: model.name
+                            text: itemCard.model.name
                             font.pixelSize: 15
                             font.weight: Font.DemiBold
-                            color: CachyTheme.textPrimary
+                            color: CachyPalette.text
                             elide: Text.ElideRight
                             Layout.fillWidth: true
                         }
 
                         Text {
-                            text: model.formattedNumber
+                            text: itemCard.model.formattedNumber
                             font.pixelSize: 13
-                            color: CachyTheme.textSecondary
+                            color: CachyPalette.textSecondary
                             elide: Text.ElideRight
                             Layout.fillWidth: true
                         }
@@ -102,39 +111,54 @@ Item {
                         radius: 20
 
                         // Soft green container
-                        color: callMouse.pressed
+                        color: callTap.pressed
                             ? "#2DB84D"
-                            : (callMouse.containsMouse
-                                ? (CachyTheme.isDark ? "#224A2A" : "#DDF3E4")
-                                : (CachyTheme.isDark ? "#1A3820" : "#EAF7EE"))
+                            : (callHover.hovered
+                                ? (CachyPalette.isDark ? "#224A2A" : "#DDF3E4")
+                                : (CachyPalette.isDark ? "#1A3820" : "#EAF7EE"))
+
+                        border.width: 1
+                        border.color: CachyPalette.specularBorder
 
                         Behavior on color { ColorAnimation { duration: 120 } }
+
+                        scale: callTap.pressed ? 0.94 : (callHover.hovered ? 1.05 : 1.0)
+                        Behavior on scale {
+                            NumberAnimation { duration: CachyTheme.animFast; easing.type: Easing.OutBack }
+                        }
 
                         CachyIcon {
                             name: "call-start"
                             size: 20
-                            color: callMouse.pressed ? "#FFFFFF" : "#34C759"
+                            color: callTap.pressed ? "#FFFFFF" : "#34C759"
                             anchors.centerIn: parent
                         }
 
-                        MouseArea {
-                            id: callMouse
-                            anchors.fill: parent
-                            hoverEnabled: true
+                        HoverHandler {
+                            id: callHover
                             cursorShape: Qt.PointingHandCursor
-                            onClicked: phoneController.startCall(model.number)
                         }
+
+                        TapHandler {
+                            id: callTap
+                            onTapped: phoneController.startCall(itemCard.model.number)
+                        }
+
+                        QQC2.ToolTip.visible: callHover.hovered
+                        QQC2.ToolTip.text: i18n("Llamar")
+                        QQC2.ToolTip.delay: 450
                     }
                 }
 
-                // Whole-card click to call
-                MouseArea {
-                    id: itemMouse
-                    anchors.fill: parent
-                    hoverEnabled: true
+                HoverHandler {
+                    id: itemHover
                     cursorShape: Qt.PointingHandCursor
-                    z: -1
-                    onClicked: phoneController.startCall(model.number)
+                }
+
+                // Whole-card click to call
+                TapHandler {
+                    id: itemTap
+                    onTapped: phoneController.startCall(itemCard.model.number)
                 }
             }
         }
